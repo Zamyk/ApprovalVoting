@@ -5,6 +5,16 @@ from votekit.ballot import Ballot
 class ApprovalBallot(Ballot):
     __slots__ = ["approved"]
 
+    def __new__(
+        cls,
+        *,
+        approved: Iterable[str],
+        weight: Union[float, int] = 1.0,
+        voter_set: Union[set[str], frozenset[str]] = frozenset(),
+        **kwargs
+    ):
+        return super().__new__(cls, weight=weight, voter_set=voter_set, **kwargs)
+
     def __init__(
         self,
         *,

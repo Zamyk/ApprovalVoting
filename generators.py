@@ -22,4 +22,4 @@ def approval_ic_profile_generator(
     
     ballots = [ApprovalBallot(approved=[candidate for candidate in candidates if random.getrandbits(1)]) for _ in range(number_of_ballots)]
 
-    return ApprovalProfile(ballots=tuple(ballots), candidates= candidates)
+    return ApprovalProfile(ballots=tuple(ballots), candidates=candidates)
