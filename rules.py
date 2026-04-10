@@ -16,21 +16,21 @@ class GeneralApproval(Election[ApprovalProfile]):
 
 
 def ow_hamming_hamming_score(profile: ApprovalProfile, weights: Sequence[float], committee: set[str]) -> float:
-        scores = profile.df.drop(columns=['Weight', 'Voter Set']).fillna(0)
+    scores = profile.df.drop(columns=['Weight', 'Voter Set']).fillna(0)
 
-        committee_vector = pd.Series(
-            [1.0 if c in committee else 0.0 for c in scores.columns],
-            index=scores.columns
-        )        
+    committee_vector = pd.Series(
+        [1.0 if c in committee else 0.0 for c in scores.columns],
+        index=scores.columns
+    )        
 
-        distances = (scores != committee_vector).sum(axis=1)
-        distances = sorted(distances, reverse=True)
+    distances = (scores != committee_vector).sum(axis=1)
+    distances = sorted(distances, reverse=True)
 
-        result = 0
-        for i in range(len(distances)):
-            result += distances[i] * weights[i]
+    result = 0
+    for i in range(len(distances)):
+        result += distances[i] * weights[i]
 
-        return result
+    return result
 
 def ow_hamming_get_elected(profile: ApprovalProfile, weights: Sequence[float]) -> set[str]:
     candidates = profile.candidates
@@ -80,6 +80,3 @@ class OrderedWeightedHamming(GeneralApproval):
             self.election_states.append(new_state)
 
         return profile
-
-
-
