@@ -33,7 +33,8 @@ class ApprovalProfile(ScoreProfile):
 
 
         if df.equals(pd.DataFrame()):
-            score_ballots = [ScoreBallot(scores={c: 1 for c in ballot.approved}, weight=ballot.weight, voter_set=ballot.voter_set) for ballot in ballots]
+            d = {c: (1 if c in ballots[0].approved else 0) for c in candidates}
+            score_ballots = [ScoreBallot(scores={c: (1 if c in ballot.approved else 0) for c in candidates}, weight=ballot.weight, voter_set=ballot.voter_set) for ballot in ballots]
             super().__init__(ballots=score_ballots, candidates=candidates, df=df)
         else:
             self.__validate_init_approval_df_binary_scores(self, df)
