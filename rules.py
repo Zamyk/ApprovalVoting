@@ -36,14 +36,18 @@ def _get_elected(profile: ApprovalProfile, weights: Sequence[float], tiebreak: O
     best_score = float('inf')
     best_committee = set()
 
-    for k in range(len(candidates) + 1):
-        for committee in itertools.combinations(candidates, k):
-            score = _hamming_score(profile=profile, weights=weights, committee=committee)
-            if score < best_score:
-                best_score = score
-                best_committee = committee
+    # for k in range(len(candidates) + 1):
+    #     for committee in itertools.combinations(candidates, k):
+    #if tiebreak != 'lex': todo!
 
-    return set(best_committee)
+    for mask in range( (1 << (len(candidates))) - 1, -1, -1):
+        committee = {cand for i, cand in enumerate(candidates) if (mask >> (len(candidates) - 1 - i)) & 1}
+        score = _hamming_score(profile=profile, weights=weights, committee=committee)
+        if score < best_score:
+            best_score = score
+            best_committee = set(committee)
+    
+    return best_committee
 
 def _get_weights(weights, n):
     if weights == "minisum":
@@ -62,7 +66,7 @@ class OrderedWeightedHamming(GeneralApproval):
     def __init__(
         self, profile: ApprovalProfile, tiebreak: Optional[str] = None, weights: Union[Sequence[float] | str | tuple[str, int]] = "minisum"
     ):
-        print(profile.df)
+        #print(profile.df)
 
         self.tiebreak = tiebreak
         self.weights = _get_weights(weights, len(profile.df))
