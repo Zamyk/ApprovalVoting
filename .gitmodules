@@ -1,0 +1,3 @@
+[submodule "VoteKit"]
+	path = VoteKit
+	url = https://github.com/Zamyk/VoteKit.git
