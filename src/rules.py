@@ -1,0 +1,86 @@
+import pandas as pd
+import numpy as np
+import itertools
+
+from typing import Optional, Union, Sequence
+
+from votekit.elections import Election
+from votekit.elections import ElectionState
+
+from profile import ApprovalProfile
+
+class GeneralApproval(Election[ApprovalProfile]):
+
+    def __init__(self, profile: ApprovalProfile):
+        super().__init__(profile=profile)
+
+
+def _hamming_score(scores, weights, committee) -> float:
+    distances = (scores != committee).sum(axis=1)
+    distances = sorted(distances, reverse=True)
+    return np.dot(distances, weights)
+
+
+def _get_elected(profile: ApprovalProfile, weights: Sequence[float], tiebreak: Optional[str]) -> set[str]:
+    candidates = profile.candidates
+    best_score = float('inf')
+    best_committee = np.zeros(len(candidates), dtype=np.bool)
+
+    scores = profile.pd.to_numpy()
+
+    for mask in range( (1 << (len(candidates))) - 1, -1, -1):
+        committee = np.array([ (mask >> i) & 1 for i in range(len(candidates) - 1, -1, -1) ], dtype=bool)
+
+        score = _hamming_score(scores=scores, weights=weights, committee=committee)
+        if score < best_score:
+            best_score = score
+            best_committee = set(committee)
+
+    return best_committee
+
+def _get_weights(weights, n):
+    if weights == "minisum":
+        weights = ("f", 0)
+    elif weights == "minimax":
+        weights = ("f", n-1)
+
+    if isinstance(weights, tuple) and weights[0] == "f":
+        i = weights[1]
+        return [1.0/(n-i)] * (n-i) + [0.0] * i
+
+    return weights
+
+class OrderedWeightedHamming(GeneralApproval):
+
+    def __init__(
+        self, profile: ApprovalProfile, tiebreak: Optional[str] = None, weights: Union[Sequence[float] | str | tuple[str, int]] = "minisum"
+    ):
+        #print(profile.df)
+
+        self.tiebreak = tiebreak
+        self.weights = _get_weights(weights, len(profile.df))
+
+        super().__init__(profile=profile)
+
+    def _is_finished(self):
+        # single round election
+        if len(self.election_states) == 2:
+            return True
+        return False
+
+    def _run_step(
+        self, profile: ApprovalProfile, prev_state: ElectionState, store_states=False
+    ) -> ApprovalProfile:
+
+        elected = _get_elected(profile, self.weights, self.tiebreak)
+
+        if store_states:
+            new_state = ElectionState(
+                round_number=1,  # single shot election
+                elected=tuple(frozenset(elected)),
+                eliminated=set(profile.candidates) - elected,
+            )
+
+            self.election_states.append(new_state)
+
+        return profile
