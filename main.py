@@ -63,7 +63,7 @@ def get_manipulability_ratio(candidates, n_voters, weights_type="minimax", n_ite
     return manipulable_count / n_iterations
 
 if __name__ == "__main__":
-    candidates = ["A", "B", "C", "D", "E"]
+    candidates = ["A", "B", "C"]
     n_voters = 25
     
     print(f"Running experiments with {len(candidates)} candidates and {n_voters} voters...")
