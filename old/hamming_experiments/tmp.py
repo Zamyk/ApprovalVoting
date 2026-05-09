@@ -87,6 +87,6 @@ def tests(path, n_voters, trials, m_candidates, gen):
         print(f"Completed calculations for m={m}")
     save_data(path, results)
 
-TRIALS = 1000
+TRIALS = 100
 tests("uniform.csv", 25, TRIALS, [3, 4, 5], gen=random_profile)
 tests("biased.csv", 25, TRIALS, [3, 4, 5], gen=biased_profile)
