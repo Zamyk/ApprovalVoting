@@ -92,17 +92,15 @@ def variable_voters_tests(path, n_voters, trials, candidates, gen, weights):
             })
     save_data(path, results)
 
-if __name__ == "__main__":
-    TRIALS = 1000
-    #tests("uniform_vk.csv", 25, TRIALS, [3, 4, 5], gen=approval_ic_profile_generator)
-    # tests("biased_vk.csv", 25, TRIALS, [3, 4, 5], gen=approval_biased_profile_generator)
-    # variable_voters_tests("variable_voters.csv", [n for n in range(5, 20)], TRIALS, ["A", "B", "C", "D", "E"], gen=approval_ic_profile_generator, weights = 
-    #       [("f2n/3", lambda x : ('f', x * 2 // 3)), ("f2n/3", lambda x : ('fn/2', x // 2)), ("f2n/3", lambda x : ('fn/3', x // 3)), ("Borda", lambda x : 'Borda')])
+# if __name__ == "__main__":
+#     TRIALS = 10000
+#     tests("uniform_vk.csv", 25, TRIALS, [3, 4, 5], gen=approval_ic_profile_generator)
+#     tests("biased_vk.csv", 25, TRIALS, [3, 4, 5], gen=approval_biased_profile_generator)
 
-    WEIGHTS_CONFIG = [
-        ("f_2n_3", lambda n: ('f', n * 2 // 3)),
-        ("f_n_2",  lambda n: ('f', n // 2)),
-        ("f_n_3",  lambda n: ('f', n // 3)),
-        ("Borda",  lambda n: 'Borda')
-    ]
-    variable_voters_tests("variable_voters.csv", [n for n in range(5, 71, 5)], TRIALS, ["A", "B", "C", "D", "E"], gen=approval_ic_profile_generator, weights = WEIGHTS_CONFIG)
+#     WEIGHTS_CONFIG = [
+#         ("f_2n_3", lambda n: ('f', n * 2 // 3)),
+#         ("f_n_2",  lambda n: ('f', n // 2)),
+#         ("f_n_3",  lambda n: ('f', n // 3)),
+#         ("Borda",  lambda n: 'Borda')
+#     ]
+#     variable_voters_tests("variable_voters.csv", [n for n in range(5, 71, 5)], TRIALS, ["A", "B", "C", "D", "E"], gen=approval_ic_profile_generator, weights = WEIGHTS_CONFIG)
