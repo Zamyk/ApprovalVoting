@@ -12,18 +12,23 @@ WEIGHTS_CONFIG = [
     ]
 
 PARAMS = {
-    "path": RESULTS_DIRECTORY_PATH / "experiment_2.csv",
-    "n_voters": [n for n in range(5, 71, 5)],
-    "trials": 1,
+    "path": RESULTS_DIRECTORY_PATH / "experiment_2",
+    "voters": [n for n in range(5, 71, 5)],
+    "n_iterations": 10000,
     "candidates": ["A", "B", "C", "D", "E"],
     "gen": approval_ic_profile_generator,
-    "weights": WEIGHTS_CONFIG
+    "weights": WEIGHTS_CONFIG,
+    "n_jobs": -3,
+    "verbose": True
 }
 
 
 def run_experiment_2():
     print(f"Starting experiment_2")
-    variable_voters_tests(**PARAMS)
+    for i in range(50):
+        print(f"Starting iteration {i+1}/50")
+        PARAMS["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_{i}"
+        variable_voters_tests(**PARAMS)
     print(f"Completed experiment_2")
 
 

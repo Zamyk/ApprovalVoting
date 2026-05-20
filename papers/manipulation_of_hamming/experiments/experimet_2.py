@@ -13,11 +13,13 @@ WEIGHTS_CONFIG = [
 
 PARAMS = {
     "path": RESULTS_DIRECTORY_PATH / "experiment_2.csv",
-    "n_voters": [n for n in range(5, 71, 5)],
-    "trials": 10000,
+    "voters": [n for n in range(5, 71, 5)],
+    "n_iterations": 10000,
     "candidates": ["A", "B", "C", "D", "E"],
     "gen": approval_ic_profile_generator,
-    "weights": WEIGHTS_CONFIG
+    "weights": WEIGHTS_CONFIG,
+    "n_jobs": -2,
+    "verbose": True
 }
 
 
