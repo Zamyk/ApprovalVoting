@@ -8,17 +8,21 @@ print(RESULTS_DIRECTORY_PATH / "experiment_1_uniform.csv")
 PARAMS_1 = {
     "path": RESULTS_DIRECTORY_PATH / "experiment_1_uniform.csv",
     "n_voters": 25,
-    "trials": 10000,
-    "m_candidates": [3, 4, 5],
-    "gen": approval_ic_profile_generator
+    "n_iterations": 10000,
+    "candidates": [3, 4, 5],
+    "gen": approval_ic_profile_generator,
+    "n_jobs": -2,
+    "verbose": True
 }
 
 PARAMS_2 = {
     "path": RESULTS_DIRECTORY_PATH / "experiment_1_biased.csv",
     "n_voters": 25,
-    "trials": 10000,
-    "m_candidates": [3, 4, 5],
-    "gen": approval_biased_profile_generator
+    "n_iterations": 10000,
+    "candidates": [3, 4, 5],
+    "gen": approval_biased_profile_generator,
+    "n_jobs": -2,
+    "verbose": True
 }
 
 

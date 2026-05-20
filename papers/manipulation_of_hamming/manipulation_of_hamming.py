@@ -2,13 +2,17 @@ import numpy as np
 import pandas as pd
 from concurrent.futures import ProcessPoolExecutor
 import os
+import logging
+from pathlib import Path
 
 from votekit.pref_profile.approval_profile import ApprovalProfile
 from votekit.elections.election_types.approval.hamming import OrderedWeightedHamming
 from votekit.ballot_generator.std_generator.approval_impartial_culture import approval_ic_profile_generator, approval_biased_profile_generator
 
+
 def orness(n, fi):
     return (n + fi - 1) / (2 * (n - 1))
+
 
 def get_elected_committee(profile, weights_type="minisum"):
     election = OrderedWeightedHamming(profile=profile, weights=weights_type)
@@ -18,8 +22,10 @@ def get_elected_committee(profile, weights_type="minisum"):
 
     return np.array([c in elected_tuple[0] for c in profile.candidates])
 
+
 def get_hamming_dist(ballot_vec, committee):
     return np.sum(ballot_vec != committee)
+
 
 def can_voter_manipulate(voter_idx, profile, weights_type="minimax"):
     candidates = profile.candidates
@@ -43,6 +49,7 @@ def can_voter_manipulate(voter_idx, profile, weights_type="minimax"):
 
     return False
 
+
 def _single_iteration(args):
     """Module-level function required for pickling with multiprocessing."""
     candidates, n_voters, weights_type, gen = args
@@ -52,12 +59,20 @@ def _single_iteration(args):
             return 1
     return 0
 
-def get_manipulability_ratio(candidates, n_voters, gen, weights_type, n_iterations):
-    n_jobs = os.cpu_count()
+
+def get_manipulability_ratio(candidates, n_voters, gen, weights_type, n_iterations, *, n_jobs=1):
     args = [(candidates, n_voters, weights_type, gen)] * n_iterations
 
-    with ProcessPoolExecutor(max_workers=n_jobs) as executor:
-        results = list(executor.map(_single_iteration, args, chunksize=max(1, n_iterations // (n_jobs * 4))))
+    if n_jobs == 1:
+        results = [_single_iteration(arg) for arg in args]
+    else:
+        if n_jobs == -1:
+            n_jobs = os.cpu_count()
+        elif n_jobs < -1:
+            n_jobs = -int(os.cpu_count() / n_jobs)
+
+        with ProcessPoolExecutor(max_workers=n_jobs) as executor:
+            results = list(executor.map(_single_iteration, args, chunksize=max(1, n_iterations // (n_jobs * 4))))
 
     return sum(results) / n_iterations
 
@@ -66,31 +81,42 @@ def save_data(path, data):
     df = pd.DataFrame(data)
     df.to_csv(path, index=False)
 
-def tests(path, n_voters, trials, m_candidates, gen):
+
+def tests(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, verbose=True):
+    log_level = logging.INFO if verbose else logging.WARNING
+    logging.basicConfig(level=log_level, format='%(message)s')
+
     results = []
-    for m in m_candidates:
-        candidates = [str(i) for i in range(m)]
-        for fi in range(n_voters):
-            manipulability_ratio = get_manipulability_ratio(candidates, n_voters, gen, ("f", fi), trials)
+    for i, m in enumerate(candidates):
+        inner_candidates = [str(k) for k in range(m)]
+        for j, fi in enumerate(range(n_voters)):
+            manipulability_ratio = get_manipulability_ratio(inner_candidates, n_voters, gen, ("f", fi), n_iterations, n_jobs=n_jobs)
             results.append({
                 'm': m,
                 'orness': orness(n_voters, fi),
                 'manipulability': manipulability_ratio
             })
-        print(f"Completed calculations for m={m}")
-    save_data(path, results)
+            logging.info(f"Calculations completion [{(i*n_voters+j+1)/(len(candidates)*n_voters):.2%}]")
+        logging.info(f"Completed calculations for {m} candidates")
+    save_data(path.with_suffix(".csv"), results)
 
-def variable_voters_tests(path, n_voters, trials, candidates, gen, weights):
+
+def variable_voters_tests(path, voters, n_iterations, candidates, gen, weights, *, n_jobs=1, verbose=True):
+    log_level = logging.INFO if verbose else logging.WARNING
+    logging.basicConfig(level=log_level, format='%(message)s')
+
     results = []
-    for name, w in weights:
-        for n in n_voters:
-            manipulability_ratio = get_manipulability_ratio(candidates, n, gen, w(n), trials)
+    for i, (name, w) in enumerate(weights):
+        for j, n in enumerate(voters):
+            manipulability_ratio = get_manipulability_ratio(candidates, n, gen, w(n), n_iterations, n_jobs=n_jobs)
             results.append({
                 'f': name,
                 'n': n,
                 'manipulability': manipulability_ratio
             })
-    save_data(path, results)
+            logging.info(f"Calculations completion [{(i*len(voters)+j+1)/(len(weights)*len(voters)):.2%}]")
+        logging.info(f"Completed calculations for weight {name}")
+    save_data(path.with_suffix(".csv"), results)
 
 # if __name__ == "__main__":
 #     TRIALS = 10000
