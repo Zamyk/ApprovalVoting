@@ -8,6 +8,7 @@ from pathlib import Path
 from votekit.pref_profile.approval_profile import ApprovalProfile
 from votekit.elections.election_types.approval.hamming import OrderedWeightedHamming
 from votekit.ballot_generator.std_generator.approval_impartial_culture import approval_ic_profile_generator, approval_biased_profile_generator
+from votekit.comsoc.approval_manipulations import for_all_manipulations
 
 
 def orness(n, fi):
@@ -28,26 +29,24 @@ def get_hamming_dist(ballot_vec, committee):
 
 
 def can_voter_manipulate(voter_idx, profile, weights_type="minimax"):
-    candidates = profile.candidates
-    n_cands = len(candidates)
-
     preference = profile.votes[voter_idx].copy()
 
     true_elected = get_elected_committee(profile, weights_type)
     true_dist = get_hamming_dist(preference, true_elected)
 
-    for mask in range(1 << n_cands):
-        new_vote_vec = np.array([(mask >> i) & 1 for i in range(n_cands)], dtype=bool)
+    is_manipulable = False
 
-        profile.votes[voter_idx] = new_vote_vec
-        manipulated_elected = get_elected_committee(profile, weights_type)
+    def check_manipulation(manipulated_profile):
+        nonlocal is_manipulable
+        manipulated_elected = get_elected_committee(manipulated_profile, weights_type)
         dist = get_hamming_dist(preference, manipulated_elected)
-        profile.votes[voter_idx] = preference
-
         if dist < true_dist:
-            return True
+            is_manipulable = True
+            return False
+        return True
 
-    return False
+    for_all_manipulations(profile, voter_idx, check_manipulation)
+    return is_manipulable
 
 
 def _single_iteration(args):
