@@ -17,7 +17,7 @@ inline int hammingDistance(int x, int y) {
 
 // Resolute Lexicographical Tie-Breaking as specified in the paper
 inline bool prefersLexicographically(int outcomeA, int outcomeB) {
-    return outcomeA > outcomeB; 
+    return outcomeA > outcomeB;
 }
 
 // OWA Winner Determination Engine
@@ -32,13 +32,13 @@ int getWinner(int m, const vector<int>& profile, const vector<int>& weights) {
         for (int i = 0; i < num_voters; ++i) {
             distances[i] = hammingDistance(outcome, profile[i]);
         }
-        sort(distances.rbegin(), distances.rend()); 
+        sort(distances.rbegin(), distances.rend());
 
         int score = 0;
         for (int i = 0; i < num_voters; ++i) {
             score += weights[i] * distances[i];
         }
-        
+
         if (score < min_score) {
             min_score = score;
             best_outcome = outcome;
@@ -56,12 +56,12 @@ pair<vector<double>, vector<int>> generateFiWeights(int n, int i_zeros) {
     vector<double> w(n, 0.0);
     int num_ones = n - i_zeros;
     for (int j = 0; j < num_ones; ++j) {
-        w[j] = 1.0 / num_ones; 
+        w[j] = 1.0 / num_ones;
     }
 
     vector<int> iw(n);
     for (int j = 0; j < num_ones; ++j) {
-        iw[j] = 1; 
+        iw[j] = 1;
     }
     return {w, iw};
 }
@@ -96,7 +96,7 @@ bool isManipulable(int m, const vector<int>& profile, const vector<int>& weights
             int new_dist = hammingDistance(new_winner, profile[i]);
 
             if (new_dist < true_dist) {
-                return true; 
+                return true;
             }
         }
     }
@@ -104,7 +104,7 @@ bool isManipulable(int m, const vector<int>& profile, const vector<int>& weights
 }
 
 // Worker function to handle a chunk of the election profiles in parallel
-int countManipulableChunk(int m, const vector<vector<int>>& sampled_elections, 
+int countManipulableChunk(int m, const vector<vector<int>>& sampled_elections,
                           const vector<int>& weights, int start_idx, int end_idx) {
     int local_count = 0;
     for (int e = start_idx; e < end_idx; ++e) {
@@ -118,7 +118,8 @@ int countManipulableChunk(int m, const vector<vector<int>>& sampled_elections,
 int main() {
     int n = 25;                  // 25 Voters
     int num_elections = 10000;   // 10^4 iterations
-    mt19937 rng(42);             
+    auto rd = random_device();
+    mt19937 rng(rd());
 
     // Detect hardware threads available
     unsigned int num_threads = thread::hardware_concurrency();
@@ -129,7 +130,7 @@ int main() {
 
     for (int m : {3, 4, 5}) {
         int num_outcomes = 1 << m;
-        uniform_int_distribution<int> dist(0, num_outcomes - 1);        
+        uniform_int_distribution<int> dist(0, num_outcomes - 1);
 
         // Sweeping i from 0 (Minisum) up to n-1 (Minimax)
         for (int i_zeros = 0; i_zeros <= n - 1; ++i_zeros) {
@@ -140,7 +141,7 @@ int main() {
                 }
             }
 
-            auto [weights, iweights] = generateFiWeights(n, i_zeros);            
+            auto [weights, iweights] = generateFiWeights(n, i_zeros);
             double orness = calculateOrness(weights);
 
             // Parallel distribution of the loop tasks
@@ -152,7 +153,7 @@ int main() {
                 // Ensure the last thread handles any remainder due to integer division
                 int end_idx = (t == num_threads - 1) ? num_elections : (start_idx + chunk_size);
 
-                futures.push_back(async(launch::async, countManipulableChunk, 
+                futures.push_back(async(launch::async, countManipulableChunk,
                                         m, ref(sampled_elections), ref(iweights), start_idx, end_idx));
             }
 
