@@ -1,5 +1,5 @@
-from .experimet_1 import run_experiment_1
-from .experimet_2 import run_experiment_2
+from .experiment_1 import run_experiment_1
+from .experiment_2 import run_experiment_2
 from .plot_experiment_1 import plot_experiment_1
 from .plot_experiment_2 import plot_experiment_2
 

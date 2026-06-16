@@ -1,9 +1,9 @@
-from experiments.experimet_1 import run_experiment_1
-from experiments.experimet_2 import run_experiment_2
+from experiments.experiment_1 import run_experiment_1
+from experiments.experiment_2 import run_experiment_2
 from experiments.plot_experiment_1 import plot_experiment_1
 from experiments.plot_experiment_2 import plot_experiment_2
-from experiments_enhanced.experimet_1 import run_experiment_1 as run_experiment_1_enhanced
-from experiments_enhanced.experimet_2 import run_experiment_2 as run_experiment_2_enhanced
+from experiments_enhanced.experiment_1 import run_experiment_1 as run_experiment_1_enhanced
+from experiments_enhanced.experiment_2 import run_experiment_2 as run_experiment_2_enhanced
 from experiments_enhanced.plot_experiment_1 import plot_experiment_1 as plot_experiment_1_enhanced
 from experiments_enhanced.plot_experiment_2 import plot_experiment_2 as plot_experiment_2_enhanced
 
