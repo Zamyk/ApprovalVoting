@@ -118,6 +118,50 @@ def variable_voters_tests(path, voters, n_iterations, candidates, gen, weights, 
         logging.info(f"Completed calculations for weight {name}")
     save_data(path.with_suffix(".csv"), results)
 
+
+def _get_weights_on_int(weights, n):
+    if weights == "minisum":
+        weights = ("f", 0)
+    elif weights == "minimax":
+        weights = ("f", n - 1)
+    elif weights == "Borda":
+        weights = [i for i in range(n, 0, -1)]
+
+    if isinstance(weights, tuple) and weights[0] == "f":
+        i = weights[1]
+        assert i < n and i >= 0
+        return np.array([1] * (n - i) + [0] * i)
+
+    return np.array(weights)
+
+def _single_iteration_e4_e5(args):
+    """Module-level function required for pickling with multiprocessing."""
+    candidates, n_voters, weights_type, gen = args
+    profile = gen(candidates, n_voters)
+    manipulating_voters = 0
+    for i in range(n_voters):
+        if can_voter_manipulate(i, profile, weights_type):
+            manipulating_voters += 1
+    return manipulating_voters
+
+def get_manipulability_ratio_e4_e5(candidates, n_voters, gen, weights_type, n_iterations, *, n_jobs=1):
+    args = [(candidates, n_voters, weights_type, gen)] * n_iterations
+
+    if n_jobs == 1:
+        results = [_single_iteration_e4_e5(arg) for arg in args]
+    else:
+        if n_jobs == -1:
+            n_jobs = os.cpu_count()
+        elif n_jobs < -1:
+            n_jobs = -int(os.cpu_count() / n_jobs)
+
+        with ProcessPoolExecutor(max_workers=n_jobs) as executor:
+            results = list(executor.map(_single_iteration_e4_e5, args, chunksize=max(1, n_iterations // (n_jobs * 4))))
+
+        print(results)
+
+    return sum(results) / n_iterations / n_voters
+
 # if __name__ == "__main__":
 #     TRIALS = 10000
 #     tests("uniform_vk.csv", 25, TRIALS, [3, 4, 5], gen=approval_ic_profile_generator)
