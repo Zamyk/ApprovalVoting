@@ -55,7 +55,7 @@ PARAMS_TRIANGLE = {
 }
 
 
-def run_experiment_2_euclidean(iterations=50):
+def run_experiment_2_euclidean(iterations=1):
     print("Starting experiment_2_euclidean")
     for i in range(iterations):
         print(f"Starting iteration {i+1}/{iterations}")
