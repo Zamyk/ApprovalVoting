@@ -28,8 +28,8 @@ euclidean_triangle_generator = partial(
 PARAMS_NORMAL = {
     "path": RESULTS_DIRECTORY_PATH / "experiment_1_euclidean_normal",
     "n_voters": 25,
-    "n_iterations": 500,
-    "candidates": [3],
+    "n_iterations": 10000,
+    "candidates": [3, 5, 6],
     "gen": euclidean_normal_generator,
     "n_jobs": -3,
     "verbose": True,
@@ -38,8 +38,8 @@ PARAMS_NORMAL = {
 PARAMS_TRIANGLE = {
     "path": RESULTS_DIRECTORY_PATH / "experiment_1_euclidean_triangle",
     "n_voters": 25,
-    "n_iterations": 500,
-    "candidates": [3],
+    "n_iterations": 10000,
+    "candidates": [3, 4, 5],
     "gen": euclidean_triangle_generator,
     "n_jobs": -3,
     "verbose": True,
