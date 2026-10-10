@@ -35,7 +35,7 @@ PARAMS_2 = {
 
 def run_experiment_3():
     print(f"Starting experiment_3")
-    for i in range(50):
+    for i in range(1):
         print(f"Starting iteration {i+1}/50")
         PARAMS_1["path"] = RESULTS_DIRECTORY_PATH / f"experiment_3_uniform_{i}"
         PARAMS_2["path"] = RESULTS_DIRECTORY_PATH / f"experiment_3_biased_{i}"
