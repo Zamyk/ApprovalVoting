@@ -21,14 +21,14 @@ PARAMS = {
     "candidates": ["A", "B", "C", "D", "E"],
     "gen": approval_ic_profile_generator,
     "weights": WEIGHTS_CONFIG,
-    "n_jobs": -1,
+    "n_jobs": -3,
     "verbose": True
 }
 
 
 def run_experiment_5():
     print(f"Starting experiment_5")
-    for i in range(50):
+    for i in range(1):
         print(f"Starting iteration {i+1}/50")
         PARAMS["path"] = RESULTS_DIRECTORY_PATH / f"experiment_5_{i}"
         variable_voters_tests(**PARAMS)
