@@ -6,22 +6,31 @@ import matplotlib.pyplot as plt
 # Ścieżki importowane z Twojego projektu
 from . import RESULTS_DIRECTORY_PATH, PLOTS_DIRECTORY_PATH
 
-def load_and_aggregate_data_exp2(directory_path, start_idx, end_idx):
+def load_and_aggregate_data_exp2(directory_path, start_idx=None, end_idx=None):
     """
-    Wczytuje pliki eksperymentu 2 z podanego zakresu indeksów i agreguje statystyki
-    (średnia, min, max) dla każdej kombinacji reguły 'f' i liczby wyborców 'n'.
+    Wczytuje pliki eksperymentu 2 z podanego zakresu indeksów lub wszystkie dostępne pliki
+    i agreguje statystyki (średnia, min, max) dla każdej kombinacji reguły 'f' i liczby wyborców 'n'.
     """
     all_dfs = []
     
-    for i in range(start_idx, end_idx + 1):
-        file_path = directory_path / f'experiment_2_{i}.csv'
-        if file_path.exists():
-            all_dfs.append(pd.read_csv(file_path))
+    if start_idx is not None and end_idx is not None:
+        for i in range(start_idx, end_idx + 1):
+            file_path = directory_path / f'experiment_2_{i}.csv'
+            if file_path.exists():
+                all_dfs.append(pd.read_csv(file_path))
+            else:
+                print(f"Ostrzeżenie: Plik {file_path.name} nie istnieje. Pomijam.")
+    else:
+        single_file = directory_path / 'experiment_2.csv'
+        if single_file.exists():
+            all_dfs.append(pd.read_csv(single_file))
         else:
-            print(f"Ostrzeżenie: Plik {file_path.name} nie istnieje. Pomijam.")
+            indexed_files = sorted(directory_path.glob('experiment_2_*.csv'))
+            for f in indexed_files:
+                all_dfs.append(pd.read_csv(f))
             
     if not all_dfs:
-        raise FileNotFoundError(f"Nie znaleziono żadnych plików 'experiment_2_X.csv' w podanym zakresie.")
+        raise FileNotFoundError(f"Nie znaleziono żadnych plików 'experiment_2_X.csv' w {directory_path}.")
         
     # Łączymy wszystkie pliki w jeden DataFrame
     combined_df = pd.concat(all_dfs, ignore_index=True)
@@ -35,7 +44,7 @@ def load_and_aggregate_data_exp2(directory_path, start_idx, end_idx):
     
     return aggregated
 
-def plot_experiment_2(start_idx, end_idx):
+def plot_experiment_2(start_idx=None, end_idx=None):
     # === JEDNA WSTAWKA DO ZMIANY KOLORU NA CZERWONY ===
     plt.rcParams.update({
         'text.color': 'black',          # Kolor napisów (np. legenda)
@@ -103,7 +112,10 @@ def plot_experiment_2(start_idx, end_idx):
     plt.tight_layout()
     
     # Zapis pliku z uwzględnieniem przetworzonego zakresu w nazwie
-    output_name = f'plot_experiment_2_{start_idx}_to_{end_idx}.png'
+    if start_idx is not None and end_idx is not None:
+        output_name = f'plot_experiment_2_{start_idx}_to_{end_idx}.png'
+    else:
+        output_name = 'plot_experiment_2.png'
     plt.savefig(PLOTS_DIRECTORY_PATH / output_name, bbox_inches='tight', dpi=300)
     print(f"Wykres zapisany pomyślnie jako '{output_name}'")
 
@@ -111,8 +123,8 @@ def plot_experiment_2(start_idx, end_idx):
 if __name__ == "__main__":
     # Obsługa argumentów z linii komend
     parser = argparse.ArgumentParser(description="Generuj wykres dla Eksperymentu 2 z wielu plików.")
-    parser.add_argument("start", type=int, help="Początkowy indeks pliku (np. 0)")
-    parser.add_argument("end", type=int, help="Końcowy indeks pliku (np. 24)")
+    parser.add_argument("start", type=int, nargs="?", default=None, help="Początkowy indeks pliku (np. 0)")
+    parser.add_argument("end", type=int, nargs="?", default=None, help="Końcowy indeks pliku (np. 24)")
     
     args = parser.parse_args()
     

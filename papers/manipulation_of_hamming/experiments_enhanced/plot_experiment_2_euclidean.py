@@ -53,8 +53,12 @@ def plot_experiment_2_euclidean(start_idx=None, end_idx=None):
         "axes.titlecolor": "black",
     })
 
-    df_normal = load_and_aggregate_data_exp2(RESULTS_DIRECTORY_PATH, "normal", start_idx, end_idx)
-    df_triangle = load_and_aggregate_data_exp2(RESULTS_DIRECTORY_PATH, "triangle", start_idx, end_idx)
+    try:
+        df_normal = load_and_aggregate_data_exp2(RESULTS_DIRECTORY_PATH, "normal", start_idx, end_idx)
+        df_triangle = load_and_aggregate_data_exp2(RESULTS_DIRECTORY_PATH, "triangle", start_idx, end_idx)
+    except FileNotFoundError as e:
+        print(f"Skipping plot_experiment_2_euclidean: {e}")
+        return
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
 

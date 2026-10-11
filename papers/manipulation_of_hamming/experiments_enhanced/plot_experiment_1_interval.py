@@ -7,19 +7,28 @@ import matplotlib.pyplot as plt
 # Jeśli uruchamiasz to jako skrypt, upewnij się, że __init__.py lub struktura folderów na to pozwala
 from . import RESULTS_DIRECTORY_PATH, PLOTS_DIRECTORY_PATH
 
-def load_and_aggregate_data(directory_path, prefix, start_idx, end_idx):
+def load_and_aggregate_data(directory_path, prefix, start_idx=None, end_idx=None):
     """
     Ładuje pliki z danego zakresu indeksów i agreguje statystyki
     (średnia, wariancja, min, max) dla każdej kombinacji 'm' i 'orness'.
     """
     all_dfs = []
     
-    for i in range(start_idx, end_idx + 1):
-        file_path = directory_path / f'experiment_1_{prefix}_{i}.csv'
-        if file_path.exists():
-            all_dfs.append(pd.read_csv(file_path))
+    if start_idx is not None and end_idx is not None:
+        for i in range(start_idx, end_idx + 1):
+            file_path = directory_path / f'experiment_1_{prefix}_{i}.csv'
+            if file_path.exists():
+                all_dfs.append(pd.read_csv(file_path))
+            else:
+                print(f"Ostrzeżenie: Plik {file_path.name} nie istnieje. Pomijam.")
+    else:
+        single_file = directory_path / f'experiment_1_{prefix}.csv'
+        if single_file.exists():
+            all_dfs.append(pd.read_csv(single_file))
         else:
-            print(f"Ostrzeżenie: Plik {file_path.name} nie istnieje. Pomijam.")
+            indexed_files = sorted(directory_path.glob(f'experiment_1_{prefix}_*.csv'))
+            for f in indexed_files:
+                all_dfs.append(pd.read_csv(f))
             
     if not all_dfs:
         raise FileNotFoundError(f"Nie znaleziono żadnych plików dla prefiksu '{prefix}' w podanym zakresie.")
@@ -36,7 +45,7 @@ def load_and_aggregate_data(directory_path, prefix, start_idx, end_idx):
     
     return aggregated
 
-def plot_experiment_1(start_idx, end_idx):
+def plot_experiment_1(start_idx=None, end_idx=None):
     # === JEDNA WSTAWKA DO ZMIANY KOLORU NA CZERWONY ===
     plt.rcParams.update({
         'text.color': 'black',          # Kolor napisów (np. legenda)
@@ -116,7 +125,10 @@ def plot_experiment_1(start_idx, end_idx):
                 frameon=False, fontsize=12, handlelength=2.5)
 
     # Zapis pliku
-    output_name = f'plot_experiment_1_{start_idx}_to_{end_idx}.png'
+    if start_idx is not None and end_idx is not None:
+        output_name = f'plot_experiment_1_{start_idx}_to_{end_idx}.png'
+    else:
+        output_name = 'plot_experiment_1.png'
     plt.savefig(PLOTS_DIRECTORY_PATH / output_name, bbox_inches='tight', dpi=300)
     print(f"Plot saved successfully as '{output_name}'")
 
@@ -124,8 +136,8 @@ def plot_experiment_1(start_idx, end_idx):
 if __name__ == "__main__":
     # Konfiguracja parsera argumentów linii komend
     parser = argparse.ArgumentParser(description="Generuj wykres z zagregowanych plików eksperymentów.")
-    parser.add_argument("start", type=int, help="Początkowy indeks pliku (np. 0)")
-    parser.add_argument("end", type=int, help="Końcowy indeks pliku (np. 24)")
+    parser.add_argument("start", type=int, nargs="?", default=None, help="Początkowy indeks pliku (np. 0)")
+    parser.add_argument("end", type=int, nargs="?", default=None, help="Końcowy indeks pliku (np. 24)")
     
     args = parser.parse_args()
     
