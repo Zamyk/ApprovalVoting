@@ -15,8 +15,8 @@ WEIGHTS_CONFIG = [
     ("Borda", lambda _: "Borda"),
 ]
 
-normal_dist = partial(random.gauss, 0.0, 1.0)
-triangle_dist = partial(random.triangular, 0.0, 1.0, 0.5)
+normal_dist = partial(random.gauss, 0.0, 0.5)
+triangle_dist = partial(random.triangular, -1.0, 1.0, 0.)
 
 euclidean_normal_generator = partial(
     approval_euclidean_generator,
