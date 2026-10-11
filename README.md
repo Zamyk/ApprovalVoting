@@ -1,1 +1,3 @@
 # ApprovalVoting
+
+This repository presents the results of work on replication of experiments from selected papers regarding approval voting. Our goal is to implement all necessary algorithms and to conduct experiments as described in the paper. When some necessary information is missing we try to use the most logical approach. We also conduct enhanced experiments - all to verify if conclusions presented in the paper hold. We describe our every decision regarding an approach we take conducting particular experiments in corresponding **README.md** files.
