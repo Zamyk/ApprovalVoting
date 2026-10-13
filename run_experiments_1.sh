@@ -1,6 +1,10 @@
-source venv/bin/activate
+source venv/bin/activate 2>/dev/null || source .venv/bin/activate 2>/dev/null || true
 
-nohup nice -n 19 python3.11 -m papers.manipulation_of_hamming.experiments.experiment_1 > output_1.log 2>&1 &
+PYTHON_CMD="python3.11"
+if ! command -v python3.11 &> /dev/null; then
+    PYTHON_CMD="python3"
+fi
 
+nohup nice -n 19 $PYTHON_CMD -m papers.manipulation_of_hamming.experiments.experiment_1 > output_1.log 2>&1 &
 
-deactivate
+deactivate 2>/dev/null || true

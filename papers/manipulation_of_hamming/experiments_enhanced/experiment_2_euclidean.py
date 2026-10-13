@@ -55,14 +55,12 @@ PARAMS_TRIANGLE = {
 }
 
 
-def run_experiment_2_euclidean(iterations=1):
+def run_experiment_2_euclidean():
     print("Starting experiment_2_euclidean")
-    for i in range(iterations):
-        print(f"Starting iteration {i+1}/{iterations}")
-        PARAMS_NORMAL["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_euclidean_normal_{i}"
-        PARAMS_TRIANGLE["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_euclidean_triangle_{i}"
-        variable_voters_tests(**PARAMS_NORMAL)
-        variable_voters_tests(**PARAMS_TRIANGLE)
+    PARAMS_NORMAL["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_euclidean_normal"
+    PARAMS_TRIANGLE["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_euclidean_triangle"
+    variable_voters_tests(**PARAMS_NORMAL)
+    variable_voters_tests(**PARAMS_TRIANGLE)
     print("Completed experiment_2_euclidean")
 
 

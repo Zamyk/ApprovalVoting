@@ -157,8 +157,6 @@ def get_manipulability_ratio_e4_e5(candidates, n_voters, gen, weights_type, n_it
         with ProcessPoolExecutor(max_workers=n_jobs) as executor:
             results = list(executor.map(_single_iteration_e4_e5, args, chunksize=max(1, n_iterations // (n_jobs * 4))))
 
-        print(results)
-
     return sum(results) / n_iterations / n_voters
 
 # if __name__ == "__main__":

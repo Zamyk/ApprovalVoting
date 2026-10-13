@@ -29,7 +29,7 @@ PARAMS_NORMAL = {
     "path": RESULTS_DIRECTORY_PATH / "experiment_1_euclidean_normal",
     "n_voters": 25,
     "n_iterations": 10000,
-    "candidates": [3, 5, 6],
+    "candidates": [3, 4, 5],
     "gen": euclidean_normal_generator,
     "n_jobs": -3,
     "verbose": True,
@@ -48,12 +48,10 @@ PARAMS_TRIANGLE = {
 
 def run_experiment_1_euclidean(iterations=1):
     print("Starting experiment_1_euclidean")
-    for i in range(iterations):
-        print(f"Starting iteration {i+1}/{iterations}")
-        PARAMS_NORMAL["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_normal_{i}"
-        PARAMS_TRIANGLE["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_triangle_{i}"
-        tests(**PARAMS_NORMAL)
-        tests(**PARAMS_TRIANGLE)
+    PARAMS_NORMAL["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_normal"
+    PARAMS_TRIANGLE["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_triangle"
+    tests(**PARAMS_NORMAL)
+    tests(**PARAMS_TRIANGLE)
     print("Completed experiment_1_euclidean")
 
 
