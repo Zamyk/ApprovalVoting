@@ -25,7 +25,7 @@ PARAMS = {
     "candidates": ["A", "B", "C", "D", "E"],
     "gen": approval_ic_profile_generator,
     "weights": WEIGHTS_CONFIG,
-    "n_jobs": -2,
+    "n_jobs": -3,
     "verbose": True
 }
 

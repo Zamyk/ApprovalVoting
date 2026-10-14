@@ -14,3 +14,5 @@ venv/
 
 # OS
 .DS_Store
+
+papers/manipulation_of_hamming/experiments_enhanced/plots_old

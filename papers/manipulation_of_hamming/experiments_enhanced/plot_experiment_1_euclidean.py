@@ -13,7 +13,7 @@ def load_and_aggregate_data(directory_path, prefix, start_idx=None, end_idx=None
     all_dfs = []
     if start_idx is not None and end_idx is not None:
         for i in range(start_idx, end_idx + 1):
-            file_path = directory_path / f"experiment_1_euclidean_{prefix}_{i}.csv"
+            file_path = directory_path / f"experiment_1_euclidean_{prefix}.csv"
             if file_path.exists():
                 all_dfs.append(pd.read_csv(file_path))
             else:
@@ -24,7 +24,7 @@ def load_and_aggregate_data(directory_path, prefix, start_idx=None, end_idx=None
         if single_file.exists():
             all_dfs.append(pd.read_csv(single_file))
         else:
-            indexed_files = sorted(directory_path.glob(f"experiment_1_euclidean_{prefix}_*.csv"))
+            indexed_files = sorted(directory_path.glob(f"experiment_1_euclidean_{prefix}.csv"))
             for f in indexed_files:
                 all_dfs.append(pd.read_csv(f))
 

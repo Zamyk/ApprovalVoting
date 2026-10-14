@@ -73,11 +73,11 @@ def plot_experiment_1_integers():
                 frameon=False, fontsize=12, handlelength=2.5)
 
     # Save and display (bbox_inches='tight' prevents the outside legend from getting cut off)
-    output_name = 'plot_experiment_3_uniform_and_biased.png'
+    output_name = 'plot_experiment_1_integers.png'
     plt.savefig(PLOTS_DIRECTORY_PATH / output_name, bbox_inches='tight', dpi=300)
     print(f"Plot saved as '{output_name}'")
 
 
 if __name__ == "__main__":
-    plot_experiment_3()
+    plot_experiment_1_integers()
     

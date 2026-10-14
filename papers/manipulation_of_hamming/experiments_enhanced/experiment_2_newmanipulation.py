@@ -17,7 +17,7 @@ WEIGHTS_CONFIG = [
 PARAMS = {
     "path": RESULTS_DIRECTORY_PATH / "experiment_2_newmanipulation",
     "voters": [n for n in range(5, 71, 5)],
-    "n_iterations": 100,
+    "n_iterations": 10000,
     "candidates": ["A", "B", "C", "D", "E"],
     "gen": approval_ic_profile_generator,
     "weights": WEIGHTS_CONFIG,

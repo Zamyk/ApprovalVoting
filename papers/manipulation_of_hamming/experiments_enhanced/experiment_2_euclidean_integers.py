@@ -1,10 +1,15 @@
 from functools import partial
 import random
 from . import RESULTS_DIRECTORY_PATH
-from ..manipulation_of_hamming import variable_voters_tests
+
+import votekit.elections.election_types.approval.hamming as approval_module
+from ..manipulation_of_hamming import _get_weights_on_int
+approval_module._get_weights = _get_weights_on_int
+
 from votekit.ballot_generator.std_generator.approval_impartial_culture import (
     approval_euclidean_generator,
 )
+from ..manipulation_of_hamming import variable_voters_tests
 
 APPROVE_RADIUS = 0.2
 
@@ -39,7 +44,7 @@ PARAMS_NORMAL = {
     "candidates": ["A", "B", "C", "D", "E"],
     "gen": euclidean_normal_generator,
     "weights": WEIGHTS_CONFIG,
-    "n_jobs": -3,
+    "n_jobs": -2,
     "verbose": True,
 }
 
@@ -50,7 +55,7 @@ PARAMS_TRIANGLE = {
     "candidates": ["A", "B", "C", "D", "E"],
     "gen": euclidean_triangle_generator,
     "weights": WEIGHTS_CONFIG,
-    "n_jobs": -3,
+    "n_jobs": -2,
     "verbose": True,
 }
 
