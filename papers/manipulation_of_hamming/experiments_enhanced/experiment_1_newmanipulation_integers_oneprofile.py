@@ -8,7 +8,7 @@ import papers.manipulation_of_hamming.manipulation_of_hamming as manipulation_mo
 from ..manipulation_of_hamming import get_manipulability_ratio_e4_e5
 manipulation_module.get_manipulability_ratio = get_manipulability_ratio_e4_e5
 from votekit.ballot_generator.std_generator.approval_impartial_culture import approval_ic_profile_generator, approval_biased_profile_generator
-from ..manipulation_of_hamming import tests
+from ..manipulation_of_hamming import tests_oneprofile
 
 
 PARAMS_1 = {
