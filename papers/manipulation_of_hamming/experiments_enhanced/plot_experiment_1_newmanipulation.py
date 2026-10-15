@@ -60,7 +60,7 @@ def plot_experiment_1_newmanipulation():
     plot_subplot(axes[1], df_biased, 'Biased Elections', is_biased=True)
 
     # Set common X and Y labels
-    axes[0].set_ylabel('Ratio of Manipulation (altered definition)', fontsize=14, labelpad=10)
+    axes[0].set_ylabel('Ratio of VotersManipulation', fontsize=14, labelpad=10)
     # Use fig.supxlabel for a perfectly centered x-axis label across both subplots
     fig.supxlabel('Orness Measure', fontsize=14, y=-0.05)
 
