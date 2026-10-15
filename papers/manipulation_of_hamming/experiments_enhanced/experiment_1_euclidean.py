@@ -1,5 +1,6 @@
 from functools import partial
 import random
+from datetime import datetime
 from . import RESULTS_DIRECTORY_PATH
 from ..manipulation_of_hamming import tests
 from votekit.ballot_generator.std_generator.approval_impartial_culture import (
@@ -47,12 +48,12 @@ PARAMS_TRIANGLE = {
 
 
 def run_experiment_1_euclidean(iterations=1):
-    print("Starting experiment_1_euclidean")
+    print(f"Starting experiment_1_euclidean | time: {datetime.now()}")
     PARAMS_NORMAL["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_normal"
     PARAMS_TRIANGLE["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_triangle"
     tests(**PARAMS_NORMAL)
     tests(**PARAMS_TRIANGLE)
-    print("Completed experiment_1_euclidean")
+    print(f"Completed experiment_1_euclidean | time: {datetime.now()}")
 
 
 if __name__ == "__main__":

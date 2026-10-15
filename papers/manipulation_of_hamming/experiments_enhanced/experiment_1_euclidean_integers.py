@@ -1,5 +1,6 @@
 from functools import partial
 import random
+from datetime import datetime
 from . import RESULTS_DIRECTORY_PATH
 
 import votekit.elections.election_types.approval.hamming as approval_module
@@ -52,12 +53,12 @@ PARAMS_TRIANGLE = {
 
 
 def run_experiment_1_euclidean_integers(iterations=1):
-    print("Starting experiment_1_euclidean_integers")
+    print(f"Starting experiment_1_euclidean_integers | time: {datetime.now()}")
     PARAMS_NORMAL["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_integers_normal"
     PARAMS_TRIANGLE["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_integers_triangle"
     tests(**PARAMS_NORMAL)
     tests(**PARAMS_TRIANGLE)
-    print("Completed experiment_1_euclidean_integers")
+    print(f"Completed experiment_1_euclidean_integers | time: {datetime.now()}")
 
 
 if __name__ == "__main__":

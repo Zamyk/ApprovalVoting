@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from . import RESULTS_DIRECTORY_PATH
 from ..manipulation_of_hamming import variable_voters_tests
 from votekit.ballot_generator.std_generator.approval_impartial_culture import approval_ic_profile_generator, approval_biased_profile_generator
@@ -24,12 +25,12 @@ PARAMS = {
 
 
 def run_experiment_2_iterations(iterations=50):
-    print(f"Starting experiment_2_iterations")
+    print(f"Starting experiment_2_iterations | time: {datetime.now()}")
     for i in range(iterations):
-        print(f"Starting iteration {i+1}/{iterations}")
+        print(f"Starting iteration {i+1}/{iterations} | time: {datetime.now()}")
         PARAMS["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_iterations_{i}"
         variable_voters_tests(**PARAMS)
-    print(f"Completed experiment_2_iterations")
+    print(f"Completed experiment_2_iterations | time: {datetime.now()}")
 
 
 if __name__ == "__main__":

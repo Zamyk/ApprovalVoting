@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from . import RESULTS_DIRECTORY_PATH
 
 import votekit.elections.election_types.approval.hamming as approval_module
@@ -32,12 +33,12 @@ PARAMS_2 = {
 
 
 def run_experiment_1_integers_oneprofile():
-    print(f"Starting experiment_1_integers_oneprofile")
+    print(f"Starting experiment_1_integers_oneprofile | time: {datetime.now()}")
     PARAMS_1["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_integers_oneprofile_uniform"
     PARAMS_2["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_integers_oneprofile_biased"
     tests_oneprofile(**PARAMS_1)
     tests_oneprofile(**PARAMS_2)
-    print(f"Completed experiment_1_integers_oneprofile")
+    print(f"Completed experiment_1_integers_oneprofile | time: {datetime.now()}")
 
 
 if __name__ == "__main__":

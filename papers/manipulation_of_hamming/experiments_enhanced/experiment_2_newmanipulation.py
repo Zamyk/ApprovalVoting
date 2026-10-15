@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from . import RESULTS_DIRECTORY_PATH
 import papers.manipulation_of_hamming.manipulation_of_hamming as manipulation_module
 from ..manipulation_of_hamming import get_manipulability_ratio_e4_e5
@@ -27,11 +28,10 @@ PARAMS = {
 
 
 def run_experiment_2_newmanipulation():
-    print(f"Starting experiment_2_newmanipulation")
+    print(f"Starting experiment_2_newmanipulation | time: {datetime.now()}")
     PARAMS["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_newmanipulation"
     variable_voters_tests(**PARAMS)
-    print(f"Completed experiment_2_newmanipulation")
-
+    print(f"Completed experiment_2_newmanipulation | time: {datetime.now()}")
 
 if __name__ == "__main__":
     run_experiment_2_newmanipulation()

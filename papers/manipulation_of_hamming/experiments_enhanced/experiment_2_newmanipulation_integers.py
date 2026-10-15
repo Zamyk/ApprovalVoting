@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from . import RESULTS_DIRECTORY_PATH
 import votekit.elections.election_types.approval.hamming as approval_module
 from ..manipulation_of_hamming import _get_weights_on_int
@@ -31,11 +32,10 @@ PARAMS = {
 
 
 def run_experiment_2_newmanipulation_integers():
-    print(f"Starting experiment_2_newmanipulation_integers")
+    print(f"Starting experiment_2_newmanipulation_integers | time: {datetime.now()}")
     PARAMS["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_newmanipulation_integers"
     variable_voters_tests(**PARAMS)
-    print(f"Completed experiment_2_newmanipulation_integers")
-
+    print(f"Completed experiment_2_newmanipulation_integers | time: {datetime.now()}")
 
 if __name__ == "__main__":
     run_experiment_2_newmanipulation_integers()
