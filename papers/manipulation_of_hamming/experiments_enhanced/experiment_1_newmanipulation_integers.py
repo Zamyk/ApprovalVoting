@@ -12,7 +12,7 @@ from ..manipulation_of_hamming import tests
 
 
 PARAMS_1 = {
-    "path": RESULTS_DIRECTORY_PATH / "experiment_1_newmanipulation_uniform",
+    "path": RESULTS_DIRECTORY_PATH / "experiment_1_newmanipulation_integers_uniform",
     "n_voters": 25,
     "n_iterations": 10000,
     "candidates": [3, 4, 5],
@@ -22,7 +22,7 @@ PARAMS_1 = {
 }
 
 PARAMS_2 = {
-    "path": RESULTS_DIRECTORY_PATH / "experiment_1_newmanipulation_biased",
+    "path": RESULTS_DIRECTORY_PATH / "experiment_1_newmanipulation_integers_biased",
     "n_voters": 25,
     "n_iterations": 10000,
     "candidates": [3, 4, 5],
@@ -32,14 +32,14 @@ PARAMS_2 = {
 }
 
 
-def run_experiment_1_newmanipulation():
-    print(f"Starting experiment_1_newmanipulation")
-    PARAMS_1["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_newmanipulation_uniform"
-    PARAMS_2["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_newmanipulation_biased"
+def run_experiment_1_newmanipulation_integers():
+    print(f"Starting experiment_1_newmanipulation_integers")
+    PARAMS_1["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_newmanipulation_integers_uniform"
+    PARAMS_2["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_newmanipulation_integers_biased"
     tests(**PARAMS_1)
     tests(**PARAMS_2)
-    print(f"Completed experiment_1_newmanipulation")
+    print(f"Completed experiment_1_newmanipulation_integers")
 
 
 if __name__ == "__main__":
-    run_experiment_1_newmanipulation()
+    run_experiment_1_newmanipulation_integers()

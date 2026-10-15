@@ -30,8 +30,8 @@ PARAMS_2 = {
 
 def run_experiment_1_newmanipulation():
     print(f"Starting experiment_1_newmanipulation")
-    PARAMS_1["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_newmanipulation_uniform_{i}"
-    PARAMS_2["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_newmanipulation_biased_{i}"
+    PARAMS_1["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_newmanipulation_uniform"
+    PARAMS_2["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_newmanipulation_biased"
     tests(**PARAMS_1)
     tests(**PARAMS_2)
     print(f"Completed experiment_1_newmanipulation")

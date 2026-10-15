@@ -159,15 +159,46 @@ def get_manipulability_ratio_e4_e5(candidates, n_voters, gen, weights_type, n_it
 
     return sum(results) / n_iterations / n_voters
 
-# if __name__ == "__main__":
-#     TRIALS = 10000
-#     tests("uniform_vk.csv", 25, TRIALS, [3, 4, 5], gen=approval_ic_profile_generator)
-#     tests("biased_vk.csv", 25, TRIALS, [3, 4, 5], gen=approval_biased_profile_generator)
+def _single_iteration_oneprofile(args):
+    """Module-level function required for pickling with multiprocessing."""
+    candidates, n_voters, weights_type, profile = args
+    for i in range(n_voters):
+        if can_voter_manipulate(i, profile, weights_type):
+            return 1
+    return 0
 
-#     WEIGHTS_CONFIG = [
-#         ("f_2n_3", lambda n: ('f', n * 2 // 3)),
-#         ("f_n_2",  lambda n: ('f', n // 2)),
-#         ("f_n_3",  lambda n: ('f', n // 3)),
-#         ("Borda",  lambda n: 'Borda')
-#     ]
-#     variable_voters_tests("variable_voters.csv", [n for n in range(5, 71, 5)], TRIALS, ["A", "B", "C", "D", "E"], gen=approval_ic_profile_generator, weights = WEIGHTS_CONFIG)
+
+def get_manipulability_ratio_oneprofile(candidates, n_voters, weights_type, profiles, *, n_jobs=1):
+    args = [(candidates, n_voters, weights_type, profile) for profile in profiles]
+
+    if n_jobs == 1:
+        results = [_single_iteration_oneprofile(arg) for arg in args]
+    else:
+        if n_jobs == -1:
+            n_jobs = os.cpu_count()
+        elif n_jobs < -1:
+            n_jobs = -int(os.cpu_count() / n_jobs)
+
+        with ProcessPoolExecutor(max_workers=n_jobs) as executor:
+            results = list(executor.map(_single_iteration_oneprofile, args, chunksize=max(1, len(profiles) // (n_jobs * 4))))
+
+    return sum(results) / len(profiles)
+
+def tests_oneprofile(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, verbose=True):
+    log_level = logging.INFO if verbose else logging.WARNING
+    logging.basicConfig(level=log_level, format='%(message)s')
+
+    results = []
+    for i, m in enumerate(candidates):
+        inner_candidates = [str(k) for k in range(m)]
+        profiles = [gen(inner_candidates, n_voters) for _ in range(n_iterations)]
+        for j, fi in enumerate(range(n_voters)):
+            manipulability_ratio = get_manipulability_ratio_oneprofile(inner_candidates, n_voters, ("f", fi), profiles, n_jobs=n_jobs)
+            results.append({
+                'm': m,
+                'orness': orness(n_voters, fi),
+                'manipulability': manipulability_ratio
+            })
+            logging.info(f"Calculations completion [{(i*n_voters+j+1)/(len(candidates)*n_voters):.2%}]")
+        logging.info(f"Completed calculations for {m} candidates")
+    save_data(path.with_suffix(".csv"), results)

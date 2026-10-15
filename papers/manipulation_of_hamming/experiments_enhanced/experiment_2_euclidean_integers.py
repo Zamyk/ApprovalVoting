@@ -61,7 +61,7 @@ PARAMS_TRIANGLE = {
 
 
 def run_experiment_2_euclidean_integers():
-    print("Starting experiment_2_euclidean")
+    print("Starting experiment_2_euclidean_integers")
     PARAMS_NORMAL["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_euclidean_integers_normal"
     PARAMS_TRIANGLE["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_euclidean_integers_triangle"
     variable_voters_tests(**PARAMS_NORMAL)

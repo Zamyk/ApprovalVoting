@@ -19,7 +19,7 @@ WEIGHTS_CONFIG = [
     ]
 
 PARAMS = {
-    "path": RESULTS_DIRECTORY_PATH / "experiment_2_newmanipulation",
+    "path": RESULTS_DIRECTORY_PATH / "experiment_2_newmanipulation_integers",
     "voters": [n for n in range(5, 71, 5)],
     "n_iterations": 10000,
     "candidates": ["A", "B", "C", "D", "E"],
@@ -30,12 +30,12 @@ PARAMS = {
 }
 
 
-def run_experiment_2_newmanipulation():
-    print(f"Starting experiment_2_newmanipulation")
-    PARAMS["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_newmanipulation"
+def run_experiment_2_newmanipulation_integers():
+    print(f"Starting experiment_2_newmanipulation_integers")
+    PARAMS["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_newmanipulation_integers"
     variable_voters_tests(**PARAMS)
-    print(f"Completed experiment_2_newmanipulation")
+    print(f"Completed experiment_2_newmanipulation_integers")
 
 
 if __name__ == "__main__":
-    run_experiment_2_newmanipulation()
+    run_experiment_2_newmanipulation_integers()

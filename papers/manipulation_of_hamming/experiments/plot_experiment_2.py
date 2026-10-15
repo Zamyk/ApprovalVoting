@@ -54,7 +54,9 @@ def plot_experiment_2():
             frameon=False, fontsize=15, handlelength=3)
 
     plt.tight_layout()
-    plt.savefig(PLOTS_DIRECTORY_PATH / 'plot_experiment_2.png', bbox_inches='tight', dpi=300)
+    output_name = 'plot_experiment_2.png'
+    plt.savefig(PLOTS_DIRECTORY_PATH / output_name, bbox_inches='tight', dpi=300)
+    print(f"Plot saved as '{output_name}'")
 
 
 if __name__ == "__main__":
