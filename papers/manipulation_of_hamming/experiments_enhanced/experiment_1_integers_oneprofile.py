@@ -9,7 +9,7 @@ from votekit.ballot_generator.std_generator.approval_impartial_culture import (
     approval_ic_profile_generator,
     approval_biased_profile_generator
 )
-from ..manipulation_of_hamming import tests_oneprofile
+from ..manipulation_of_hamming import experiment_1_oneprofile
 
 PARAMS_1 = {
     "path": RESULTS_DIRECTORY_PATH / "experiment_1_integers_uniform_oneprofile",
@@ -36,8 +36,8 @@ def run_experiment_1_integers_oneprofile():
     print(f"Starting experiment_1_integers_oneprofile | time: {datetime.now()}")
     PARAMS_1["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_integers_oneprofile_uniform"
     PARAMS_2["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_integers_oneprofile_biased"
-    tests_oneprofile(**PARAMS_1)
-    tests_oneprofile(**PARAMS_2)
+    experiment_1_oneprofile(**PARAMS_1)
+    experiment_1_oneprofile(**PARAMS_2)
     print(f"Completed experiment_1_integers_oneprofile | time: {datetime.now()}")
 
 

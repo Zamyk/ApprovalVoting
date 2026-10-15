@@ -5,7 +5,7 @@ import papers.manipulation_of_hamming.manipulation_of_hamming as manipulation_mo
 from ..manipulation_of_hamming import get_manipulability_ratio_e4_e5
 manipulation_module.get_manipulability_ratio = get_manipulability_ratio_e4_e5
 from votekit.ballot_generator.std_generator.approval_impartial_culture import approval_ic_profile_generator, approval_biased_profile_generator
-from ..manipulation_of_hamming import variable_voters_tests
+from ..manipulation_of_hamming import experiment_2
 
 
 WEIGHTS_CONFIG = [
@@ -30,7 +30,7 @@ PARAMS = {
 def run_experiment_2_newmanipulation():
     print(f"Starting experiment_2_newmanipulation | time: {datetime.now()}")
     PARAMS["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_newmanipulation"
-    variable_voters_tests(**PARAMS)
+    experiment_2(**PARAMS)
     print(f"Completed experiment_2_newmanipulation | time: {datetime.now()}")
 
 if __name__ == "__main__":

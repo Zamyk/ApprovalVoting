@@ -10,7 +10,7 @@ approval_module._get_weights = _get_weights_on_int
 from votekit.ballot_generator.std_generator.approval_impartial_culture import (
     approval_euclidean_generator,
 )
-from ..manipulation_of_hamming import tests_oneprofile
+from ..manipulation_of_hamming import experiment_1_oneprofile
 
 APPROVE_RADIUS = 0.2
 
@@ -56,8 +56,8 @@ def run_experiment_1_euclidean_integers_oneprofile(iterations=1):
     print(f"Starting experiment_1_euclidean_integers_oneprofile | time: {datetime.now()}")
     PARAMS_NORMAL["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_integers_oneprofile_normal"
     PARAMS_TRIANGLE["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_integers_oneprofile_triangle"
-    tests_oneprofile(**PARAMS_NORMAL)
-    tests_oneprofile(**PARAMS_TRIANGLE)
+    experiment_1_oneprofile(**PARAMS_NORMAL)
+    experiment_1_oneprofile(**PARAMS_TRIANGLE)
     print(f"Completed experiment_1_euclidean_integers_oneprofile | time: {datetime.now()}")
 
 

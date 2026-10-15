@@ -10,7 +10,7 @@ approval_module._get_weights = _get_weights_on_int
 from votekit.ballot_generator.std_generator.approval_impartial_culture import (
     approval_euclidean_generator,
 )
-from ..manipulation_of_hamming import variable_voters_tests
+from ..manipulation_of_hamming import experiment_2
 
 APPROVE_RADIUS = 0.2
 
@@ -45,7 +45,7 @@ PARAMS_NORMAL = {
     "candidates": ["A", "B", "C", "D", "E"],
     "gen": euclidean_normal_generator,
     "weights": WEIGHTS_CONFIG,
-    "n_jobs": -2,
+    "n_jobs": -3,
     "verbose": True,
 }
 
@@ -65,8 +65,8 @@ def run_experiment_2_euclidean_integers():
     print(f"Starting experiment_2_euclidean_integers | time: {datetime.now()}")
     PARAMS_NORMAL["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_euclidean_integers_normal"
     PARAMS_TRIANGLE["path"] = RESULTS_DIRECTORY_PATH / f"experiment_2_euclidean_integers_triangle"
-    variable_voters_tests(**PARAMS_NORMAL)
-    variable_voters_tests(**PARAMS_TRIANGLE)
+    experiment_2(**PARAMS_NORMAL)
+    experiment_2(**PARAMS_TRIANGLE)
     print(f"Completed experiment_2_euclidean_integers | time: {datetime.now()}")
 
 

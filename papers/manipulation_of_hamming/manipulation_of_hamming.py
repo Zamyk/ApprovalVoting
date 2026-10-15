@@ -81,7 +81,7 @@ def save_data(path, data):
     df.to_csv(path, index=False)
 
 
-def tests(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, verbose=True):
+def experiment_1(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, verbose=True):
     log_level = logging.INFO if verbose else logging.WARNING
     logging.basicConfig(level=log_level, format='%(message)s')
 
@@ -100,7 +100,7 @@ def tests(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, verbose=Tr
     save_data(path.with_suffix(".csv"), results)
 
 
-def variable_voters_tests(path, voters, n_iterations, candidates, gen, weights, *, n_jobs=1, verbose=True):
+def experiment_2(path, voters, n_iterations, candidates, gen, weights, *, n_jobs=1, verbose=True):
     log_level = logging.INFO if verbose else logging.WARNING
     logging.basicConfig(level=log_level, format='%(message)s')
 
@@ -184,7 +184,7 @@ def get_manipulability_ratio_oneprofile(candidates, n_voters, weights_type, prof
 
     return sum(results) / len(profiles)
 
-def tests_oneprofile(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, verbose=True):
+def experiment_1_oneprofile(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, verbose=True):
     log_level = logging.INFO if verbose else logging.WARNING
     logging.basicConfig(level=log_level, format='%(message)s')
 

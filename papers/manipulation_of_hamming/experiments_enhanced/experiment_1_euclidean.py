@@ -2,7 +2,7 @@ from functools import partial
 import random
 from datetime import datetime
 from . import RESULTS_DIRECTORY_PATH
-from ..manipulation_of_hamming import tests
+from ..manipulation_of_hamming import experiment_1
 from votekit.ballot_generator.std_generator.approval_impartial_culture import (
     approval_euclidean_generator,
 )
@@ -51,8 +51,8 @@ def run_experiment_1_euclidean(iterations=1):
     print(f"Starting experiment_1_euclidean | time: {datetime.now()}")
     PARAMS_NORMAL["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_normal"
     PARAMS_TRIANGLE["path"] = RESULTS_DIRECTORY_PATH / f"experiment_1_euclidean_triangle"
-    tests(**PARAMS_NORMAL)
-    tests(**PARAMS_TRIANGLE)
+    experiment_1(**PARAMS_NORMAL)
+    experiment_1(**PARAMS_TRIANGLE)
     print(f"Completed experiment_1_euclidean | time: {datetime.now()}")
 
 
