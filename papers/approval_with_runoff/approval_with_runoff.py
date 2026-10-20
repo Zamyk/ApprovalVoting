@@ -1,92 +1,78 @@
-from pathlib import Path
 import numpy as np
-import pandas as pd
-import logging
 
 
-def alpha_seqAV(votes, committee, alpha):
-  winner = 0
-  winner_score = -1
-
-  counts = [0] * len(committee)
-  for vote in votes:
-    for candidate in vote:
-      counts[candidate] += 1
-
-  for candidate in range(len(committee)):
-    if counts[candidate] > winner_score:
-      winner = candidate
-      winner_score = counts[candidate]
-
-  with_winner = [0] * len(committee)
-  for vote in votes:
-    if winner in vote:
-      for candidate in vote:
-        if candidate != winner:
-          with_winner[candidate] += 1
-
-  second = 0
-  second_score = -float('inf')
-  for i in range(len(committee)):
-    score = -alpha * with_winner[i] + counts[i]
-    eps = 1e-9
-    if i != winner and (score > second_score - eps) or ( abs(score - second_score) <= eps and abs(committee[i]) > abs(committee[second])):# so we can use different things there idk what is correct
-      second = i
-      second_score = score
-
-  return winner, second
-
-def alpha_AV(votes, candidates, alpha):
-  pass
+def approval_counts(profile):
+  return np.asarray(profile, dtype=np.int32).sum(axis=0)
 
 
-def generate_profile_triangular(n_voters, n_candidates, d):
-  rng = np.random.default_rng()
-  voters = rng.triangular(-1, 0, 1, n_voters)
-  candidates = np.linspace(-1, 1, n_candidates)
-
-  votes = [{i for i in range(n_candidates) if abs(candidates[i] - voter) <= d} for voter in voters]
-  return votes, candidates
-
-def generate_profile_gaussian(n_voters, n_candidates, d):
-  rng = np.random.default_rng()
-  voters = rng.normal(0, 0.5, n_voters)
-  #candidates = np.linspace(-1, 1, n_candidates)
-  candidates = np.random.uniform(-1, 1, n_candidates)
-
-  votes = [{i for i in range(n_candidates) if abs(candidates[i] - voter) <= d} for voter in voters]
-  return votes, candidates
+def coapprovals(profile, winner):
+  with_winner = np.asarray(profile[profile[:, winner] == 1], dtype=np.int32).sum(axis=0)
+  with_winner[winner] = 0
+  return with_winner
 
 
-def t1(path, verbose = True):
-  ds = [0.1, 0.25, 0.33, 0.5]
-  n_voters = 20000
-  n_candidates = 1000
-
-  log_level = logging.INFO if verbose else logging.WARNING
-  logging.basicConfig(level=log_level, format='%(message)s')
-
-  results = []
-
-  for d in ds:
-    logging.info(f"Calculations for [d={d}")
-    votes, candidates = generate_profile_gaussian(n_voters, n_candidates, d)
-    for alpha in np.linspace(0, 1, 50):
-      second = abs(candidates[alpha_seqAV(votes, candidates, alpha)[1]])
-      results.append({
-          'd': d,
-          'alpha' : alpha,
-          'winner': second
-      })
-      logging.info(f"Done for [alpha={alpha}")
-    logging.info(f"Calculations completion [d={d}")
-
-  df = pd.DataFrame(results)
-  df.to_csv(path.with_suffix(".csv"), index=False)
+def seq_components(profile):
+  counts = approval_counts(profile)
+  winner = int(np.argmax(counts))
+  return winner, counts, coapprovals(profile, winner)
 
 
-def from_csv():
-  pass
+def seq_scores(counts, with_winner, alpha, winner):
+  scores = counts.astype(float) - alpha * with_winner
+  scores[winner] = -np.inf
+  return scores
 
-for i in range(50):
-  t1(Path(__file__).resolve().parent / f"results{i}")
+
+def alpha_seqAV(counts, with_winner, alpha):
+  winner = int(np.argmax(counts))
+  scores = seq_scores(counts, with_winner, alpha, winner)
+  return winner, int(np.argmax(scores))
+
+def S_Phr(counts, with_winner):
+  winner = int(np.argmax(counts))
+  scores = np.full(len(counts), np.inf)
+  ok = np.flatnonzero((counts > 0) & (np.arange(len(counts)) != winner))
+  scores[ok] = (1 + with_winner[ok] / counts[winner]) / counts[ok]
+  return winner, int(np.argmin(scores))
+
+def pair_intersections(profile):
+  ballots = np.asarray(profile, dtype=np.float32)
+  return ballots.T @ ballots
+
+
+def pair_lines(profile, counts=None, both=None):
+  if counts is None:
+    counts = approval_counts(profile)
+  if both is None:
+    both = pair_intersections(profile)
+  rows, cols = np.triu_indices(len(counts), k=1)
+  intercept = counts[rows] + counts[cols]
+  overlap = both[rows, cols]
+  return rows, cols, intercept.astype(float), overlap.astype(float)
+
+
+def alpha_AV(profile, alpha, counts=None, both=None):
+  rows, cols, intercept, overlap = pair_lines(profile, counts, both)
+  scores = intercept - alpha * overlap
+  best = int(np.argmax(scores))
+  return int(rows[best]), int(cols[best])
+
+
+def pairs_winning_somewhere(intercept, overlap, eps=1e-6):
+  breaks = [0.0, 1.0]
+  for i in range(len(intercept)):
+    for j in range(i + 1, len(intercept)):
+      gap = overlap[j] - overlap[i]
+      if abs(gap) <= eps:
+        continue
+      alpha = (intercept[j] - intercept[i]) / gap
+      if 0 < alpha < 1:
+        breaks.append(float(alpha))
+  breaks = np.array(sorted(set(breaks)))
+  samples = np.unique(np.concatenate([breaks, (breaks[:-1] + breaks[1:]) / 2]))
+  winners = set()
+  for alpha in samples:
+    scores = intercept - alpha * overlap
+    best = scores.max()
+    winners.update(np.flatnonzero(scores >= best - eps).tolist())
+  return sorted(winners)
