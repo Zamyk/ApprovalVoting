@@ -23,7 +23,7 @@ def plot(show=True, path=None, save=None):
     plt.axvline(x=0.5, color="black", linestyle="--", label="PAV")
     plt.title("AV winner, Gaussian distribution (min-max over iterations)")
     plt.xlabel(r"$\alpha$")
-    plt.ylabel("distance from the center")
+    plt.ylabel("distance from voter mean")
     plt.ylim(0, 1.0)
     plt.xlim(0, 1.0)
     plt.legend()

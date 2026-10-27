@@ -10,19 +10,29 @@ from generators import generate_profile_gaussian, generate_profile_triangular
 DS = [0.1, 0.25, 0.33, 0.5]
 N_VOTERS = 20000
 N_CANDIDATES = 1000
+N_CANDIDATES_2D = 10000
 N_ALPHAS = 50
 N_REPS = 50
 
 
-def finalist_distance(candidates, winner, second):
-  return abs(float(candidates[second]) - float(candidates[winner]))
+def voter_center(voters):
+  # voters are always (n, dim), including 1D as (n, 1)
+  return np.asarray(voters, dtype=float).mean(axis=0)
 
 
-def _distances_for_profile(candidates, alphas, counts, with_winner):
+def point_distance(a, b):
+  return float(np.linalg.norm(np.asarray(a, dtype=float) - np.asarray(b, dtype=float)))
+
+
+def finalist_distance(candidates, second, center):
+  return point_distance(candidates[second], center)
+
+
+def _distances_for_profile(candidates, alphas, counts, with_winner, center):
   distances = np.empty(len(alphas))
   for i, alpha in enumerate(alphas):
-    winner, second = alpha_seqAV(counts, with_winner, alpha)
-    distances[i] = finalist_distance(candidates, winner, second)
+    _, second = alpha_seqAV(counts, with_winner, alpha)
+    distances[i] = finalist_distance(candidates, second, center)
   return distances
 
 
@@ -30,9 +40,9 @@ def run_sample(generator, ds=DS, n_voters=N_VOTERS, n_candidates=N_CANDIDATES, n
   alphas = np.linspace(0, 1, n_alphas)
   rows = []
   for d in ds:
-    profile, candidates = generator(n_voters, n_candidates, d)
-    winner, counts, with_winner = seq_components(profile)
-    distances = _distances_for_profile(candidates, alphas, counts, with_winner)
+    profile, candidates, voters = generator(n_voters, n_candidates, d)
+    _, counts, with_winner = seq_components(profile)
+    distances = _distances_for_profile(candidates, alphas, counts, with_winner, voter_center(voters))
     for alpha, value in zip(alphas, distances):
       rows.append({"d": d, "alpha": float(alpha), "distance": float(value)})
   return pd.DataFrame(rows)
@@ -48,9 +58,9 @@ def run_gaussian(ds=DS, n_voters=N_VOTERS, n_candidates=N_CANDIDATES, n_alphas=N
 
 def _iteration(args):
   generator, d_index, d, n_voters, n_candidates, alphas = args
-  profile, candidates = generator(n_voters, n_candidates, d)
-  winner, counts, with_winner = seq_components(profile)
-  distances = _distances_for_profile(candidates, alphas, counts, with_winner)
+  profile, candidates, voters = generator(n_voters, n_candidates, d)
+  _, counts, with_winner = seq_components(profile)
+  distances = _distances_for_profile(candidates, alphas, counts, with_winner, voter_center(voters))
   return d_index, distances
 
 
@@ -77,40 +87,34 @@ def run_iterations(generator, n_reps=N_REPS, ds=DS, n_voters=N_VOTERS, n_candida
     if n_jobs != 1:
       pool.shutdown()
 
-  rows = []
-  for d_index, d in enumerate(ds):
-    values = np.vstack(collected[d_index])
-    for alpha, low, high, mid in zip(alphas, values.min(axis=0), values.max(axis=0), values.mean(axis=0)):
-      rows.append({
-        "d": d,
-        "alpha": float(alpha),
-        "min": float(low),
-        "max": float(high),
-        "mean": float(mid),
-      })
-  return pd.DataFrame(rows)
+  return _aggregate(collected, ds, alphas)
 
 
-def _pair_positions(candidates, counts, rows, cols, intercept, overlap, alphas):
+def _pair_positions(candidates, counts, rows, cols, intercept, overlap, alphas, center):
   winner = np.empty(len(alphas))
   second = np.empty(len(alphas))
   for i, alpha in enumerate(alphas):
     best = int(np.argmax(intercept - alpha * overlap))
     a = int(rows[best])
     b = int(cols[best])
-    if counts[b] > counts[a] or (counts[b] == counts[a] and abs(candidates[b]) < abs(candidates[a])):
+    da = point_distance(candidates[a], center)
+    db = point_distance(candidates[b], center)
+    if counts[b] > counts[a] or (counts[b] == counts[a] and db < da):
       a, b = b, a
-    winner[i] = abs(float(candidates[a]))
-    second[i] = abs(float(candidates[b]))
+      da, db = db, da
+    winner[i] = da
+    second[i] = db
   return winner, second
 
 
 def _av_iteration(args):
   generator, d_index, d, n_voters, n_candidates, alphas = args
-  profile, candidates = generator(n_voters, n_candidates, d)
+  profile, candidates, voters = generator(n_voters, n_candidates, d)
   counts = approval_counts(profile)
   rows, cols, intercept, overlap = pair_lines(profile, counts)
-  winner, second = _pair_positions(candidates, counts, rows, cols, intercept, overlap, alphas)
+  winner, second = _pair_positions(
+    candidates, counts, rows, cols, intercept, overlap, alphas, voter_center(voters)
+  )
   return d_index, winner, second
 
 
