@@ -16,7 +16,7 @@ def orness(n, fi):
 
 
 def get_elected_committee(profile, weights_type="minisum"):
-    election = OrderedWeightedHamming(profile=profile, weights=weights_type)
+    election = OrderedWeightedHamming(profile=profile, hamming_weights=weights_type)
     elected_tuple = election.get_elected()
     if not elected_tuple:
         return np.array([0 for c in profile.candidates])

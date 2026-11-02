@@ -15,7 +15,7 @@ def plot_experiment_pabulib(path=None, save=None, show=True, title="Pabulib Elec
 
   df = pd.read_csv(path)
 
-  fig, ax = plt.subplots(figsize=(6.5, 4.2))
+  fig, ax = plt.subplots(figsize=(9.5, 4.2), layout="constrained")
 
   # Define line styles and widths for different 'm' values to match the black-and-white print style
   line_styles = {
@@ -75,18 +75,17 @@ def plot_experiment_pabulib(path=None, save=None, show=True, title="Pabulib Elec
 
   # Place legend outside the axes on the right
   handles, labels = ax.get_legend_handles_labels()
-  ax.legend(
+  fig.legend(
       handles,
       labels,
-      loc="center left",
-      bbox_to_anchor=(1.02, 0.5),
+      loc="outside right center",
       frameon=False,
       fontsize=12,
       handlelength=2.5,
   )
 
   out = save or PLOTS_DIRECTORY_PATH / "plot_experiment_pabulib.png"
-  plt.savefig(out, dpi=300, bbox_inches="tight")
+  fig.savefig(out, dpi=300)
   print(f"Plot saved as '{out}'")
   if show:
     plt.show()
