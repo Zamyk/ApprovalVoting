@@ -5,3 +5,6 @@ RESULTS_DIRECTORY_PATH.mkdir(exist_ok=True)
 
 PLOTS_DIRECTORY_PATH = Path(__file__).resolve().parent / "plots"
 PLOTS_DIRECTORY_PATH.mkdir(exist_ok=True)
+
+DATASETS_DIRECTORY_PATH = Path(__file__).resolve().parent / "datasets"
+DATASETS_DIRECTORY_PATH.mkdir(exist_ok=True)

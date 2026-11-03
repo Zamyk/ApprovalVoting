@@ -1,26 +1,12 @@
 import os
-from . import RESULTS_DIRECTORY_PATH
-from ..proportional_rankings import tests
+from . import RESULTS_DIRECTORY_PATH, DATASETS_DIRECTORY_PATH
+from ..proportional_rankings import experiment_1_one_rule, AV
 from votekit.ballot_generator.std_generator.approval_impartial_culture import approval_ic_profile_generator, approval_biased_profile_generator
 
-print(RESULTS_DIRECTORY_PATH / "experiment_1_uniform.csv")
-
-PARAMS_1 = {
-    "path": RESULTS_DIRECTORY_PATH / "experiment_1_uniform.csv",
-    "n_voters": 25,
-    "n_iterations": 10000,
-    "candidates": [3, 4, 5],
-    "gen": approval_ic_profile_generator,
-    "n_jobs": -1,
-    "verbose": True
-}
-
-PARAMS_2 = {
-    "path": RESULTS_DIRECTORY_PATH / "experiment_1_biased.csv",
-    "n_voters": 25,
-    "n_iterations": 10000,
-    "candidates": [3, 4, 5],
-    "gen": approval_biased_profile_generator,
+PARAMS = {
+    "path_to_results": RESULTS_DIRECTORY_PATH / "experiment_1.csv",
+    "path_to_profiles": DATASETS_DIRECTORY_PATH,
+    "rule": AV,
     "n_jobs": -1,
     "verbose": True
 }
@@ -28,8 +14,7 @@ PARAMS_2 = {
 
 def run_experiment_1():
     print(f"Starting experiment_1")
-    tests(**PARAMS_1)
-    tests(**PARAMS_2)
+    experiment_1_one_rule(**PARAMS)
     print(f"Completed experiment_1")
 
 
