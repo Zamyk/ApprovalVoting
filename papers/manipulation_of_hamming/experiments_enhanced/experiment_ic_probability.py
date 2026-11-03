@@ -1,7 +1,6 @@
 """Manipulability of OrderedWeightedHamming rules in Impartial Culture as a function of the
 approval probability p (each candidate is approved independently with probability p).
 Fixed: 20 voters, 5 candidates, same rules as the variable-voters experiment."""
-import random
 from datetime import datetime
 from functools import partial
 
@@ -14,8 +13,9 @@ from ..manipulation_of_hamming import _get_weights_on_int, get_manipulability_ra
 # integer weights (avoids floating point ties); the function was renamed in VoteKit
 approval_module._get_hamming_weights = _get_weights_on_int
 
-from votekit.ballot import ApprovalBallot
-from votekit.pref_profile.approval_profile import ApprovalProfile
+from votekit.ballot_generator.std_generator.approval_impartial_culture import (
+    approval_ic_profile_generator,
+)
 
 N_VOTERS = 20
 CANDIDATES = ["A", "B", "C", "D", "E"]
@@ -29,15 +29,6 @@ WEIGHTS_CONFIG = [
     ("f_n_3", lambda n: ("f", n // 3)),
     ("Borda", lambda _: "Borda"),
 ]
-
-
-def approval_ic_p_generator(candidates, number_of_ballots, p):
-    """Impartial culture where each candidate is approved independently with probability p."""
-    ballots = tuple(
-        ApprovalBallot(approvals=[c for c in candidates if random.random() < p])
-        for _ in range(number_of_ballots)
-    )
-    return ApprovalProfile(ballots=ballots, candidates=candidates)
 
 
 def experiment_ic_probability(
@@ -54,7 +45,7 @@ def experiment_ic_probability(
     total = len(weights) * len(probabilities)
     results = []
     for p in probabilities:
-        gen = partial(approval_ic_p_generator, p=p)
+        gen = partial(approval_ic_profile_generator, p=p)
         for name, w in weights:
             ratio = get_manipulability_ratio(
                 candidates, n_voters, gen, w(n_voters), n_iterations, n_jobs=n_jobs
