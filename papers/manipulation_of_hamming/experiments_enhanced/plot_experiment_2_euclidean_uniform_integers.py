@@ -100,8 +100,8 @@ def plot_experiment_2_euclidean_uniform_integers(start_idx=None, end_idx=None):
         if not is_right:
             ax.set_ylabel("Ratio of Manipulation", fontsize=14, labelpad=10)
 
-    plot_subplot(axes[0], df_normal, "1D Euclidean (Normal voters, uniform candidates)")
-    plot_subplot(axes[1], df_triangle, "1D Euclidean (Triangle voters, uniform candidates)", is_right=True)
+    plot_subplot(axes[0], df_normal, "1D Euclidean (Normal voters)\nuniform candidates")
+    plot_subplot(axes[1], df_triangle, "1D Euclidean (Triangle voters)\nuniform candidates", is_right=True)
 
     plt.subplots_adjust(wspace=0.08)
 
