@@ -94,7 +94,7 @@ from abcvoting import abcrules
 from abcvoting.preferences import Profile
 
 # 1. Tworzymy profil dla 5 kandydatów (reprezentowanych domyślnie jako 0, 1, 2, 3, 4)
-profile = Profile(num_cand=5)
+profile = Profile(num_cand=4)
 
 # 2. Dodajemy głosy wyborców (kolejne zbiory zatwierdzonych kandydatów)
 # Wyborca 1 popiera A, B, C
@@ -102,18 +102,25 @@ profile = Profile(num_cand=5)
 # Wyborca 3 popiera A, B, C, D
 # Wyborca 4 popiera A, B
 profile.add_voters([
-    {0, 1, 2},
+    {0, 1, 2, 3},
     {3, 1},
     {0, 1, 2, 3},
     {0, 1},
 ])
 
 # 3. Wyznaczamy zwycięzców (np. komitet rozmiaru k = 2) dla reguły AV ("av")
-committeesize = 3
-winning_committees = abcrules.compute("av", profile, committeesize=committeesize)
+for committeesize in range(1, 5):
+    winning_committees = abcrules.compute("av", profile, committeesize=committeesize)
+    print(f"Zwycięskie komitety dla rozmiaru {committeesize} (indeksy):", winning_committees)
 
-print("Zwycięskie komitety (indeksy):", winning_committees)
+    # Konwersja na nazwy kandydatów
+    for committee in winning_committees:
+        print("Zwycięzcy:", [profile.candidates[cand] for cand in committee])
+# committeesize = 4
+# winning_committees = abcrules.compute("revseqpav", profile, committeesize=committeesize)
 
-# Konwersja na nazwy kandydatów
-for committee in winning_committees:
-    print("Zwycięzcy:", [profile.candidates[cand] for cand in committee])
+# print("Zwycięskie komitety (indeksy):", winning_committees)
+
+# # Konwersja na nazwy kandydatów
+# for committee in winning_committees:
+#     print("Zwycięzcy:", [profile.candidates[cand] for cand in committee])

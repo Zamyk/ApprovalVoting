@@ -101,6 +101,51 @@ def Seq_Thile(profile: ApprovalProfile, w: list[float | int] | str = "SeqPav"):
 
 
 
+def Reverse_Seq_PAV(profile: ApprovalProfile):
+    w = [1/(i+1) for i in range(len(profile.candidates))]
+
+    w_acc = [0] + w.copy()
+    for i in range(1, len(w_acc)):
+        w_acc[i] += w_acc[i-1]
+
+    approval_sets = [set(ballot.approvals) for ballot in profile.ballots if ballot.approvals]
+
+    elected_candidates_reversed = []
+    not_elected_candidates = list(profile.candidates)
+    current_ranking_set = set(profile.candidates)
+    for _ in range(len(profile.candidates)):
+        min_score = float('inf')
+        best_candidate = None
+        for c in not_elected_candidates:
+            current_ranking_set.remove(c)
+            w_score = 0
+            for approval_set in approval_sets:
+                n = len(approval_set & current_ranking_set)
+                w_score -= w_acc[n]
+
+            if w_score < min_score:
+                min_score = w_score
+                best_candidate = c
+
+            current_ranking_set.add(c)
+
+        elected_candidates_reversed.append(best_candidate)
+        current_ranking_set.remove(best_candidate)
+        not_elected_candidates.remove(best_candidate)
+
+    elected_candidates_reversed.reverse()
+
+    return elected_candidates_reversed
+
+
+# profile = ApprovalProfile(candidates=["A", "B", "C", "D"], ballots=[
+#     ApprovalBallot(approvals=["A", "B", "C", "D"]), 
+#     ApprovalBallot(approvals=["B", "D"]), 
+#     ApprovalBallot(approvals=["A", "B", "C", "D"]),
+#     ApprovalBallot(approvals=["A", "B"])])
+
+# print(Reverse_Seq_PAV(profile))
+
 def save_data(path, data):
     df = pd.DataFrame(data)
     df.to_csv(path, index=False)
