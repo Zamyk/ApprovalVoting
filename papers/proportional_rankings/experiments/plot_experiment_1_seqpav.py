@@ -2,9 +2,9 @@ from . import RESULTS_DIRECTORY_PATH, PLOTS_DIRECTORY_PATH
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def plot_scatter_a_yr():
+def plot_scatter_a_yr_seqpav():
     # Wczytaj zbiór danych zawierający kolumny 'a' oraz 'y_r'
-    df = pd.read_csv(RESULTS_DIRECTORY_PATH / 'experiment_1.csv')
+    df = pd.read_csv(RESULTS_DIRECTORY_PATH / 'experiment_1_seqpav.csv')
 
     # Inicjalizacja pojedynczego wykresu
     fig, ax = plt.subplots(figsize=(6, 5))
@@ -32,10 +32,10 @@ def plot_scatter_a_yr():
     ax.tick_params(axis='both', which='major', labelsize=10)
 
     # Zapisanie wykresu
-    output_name = 'plot_scatter_a_yr.png'
+    output_name = 'plot_scatter_a_yr_seqpav.png'
     plt.savefig(PLOTS_DIRECTORY_PATH / output_name, bbox_inches='tight', dpi=300)
     print(f"Plot saved as '{output_name}'")
 
 
 if __name__ == "__main__":
-    plot_scatter_a_yr()
+    plot_scatter_a_yr_seqpav()

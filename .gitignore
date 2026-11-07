@@ -15,4 +15,8 @@ venv/
 # OS
 .DS_Store
 
+# other
 papers/manipulation_of_hamming/experiments_enhanced/plots_old
+papers/proportional_rankings/experiments/datasets
+output*
+papers/proportional_rankings/experiments/results/

@@ -10,17 +10,11 @@ from itertools import combinations
 from typing import Any
 from collections.abc import Callable
 from dataclasses import dataclass
+from fractions import Fraction
 
 from votekit.elections.election_types.approval.proportional_rankings import avg_devided_by_jd
 from votekit.pref_profile.approval_profile import ApprovalProfile, ApprovalBallot
 
-
-# @dataclass(frozen=True)
-# class ProfileGeneratingConfig:
-#     n_candidates_interval: tuple[int, int]
-#     n_voters_interval: tuple[int, int]
-#     profile_generator: Callable[..., ApprovalProfile]
-#     n_iterations: int
 
 
 def dump_data(data: Any, path: str) -> None:
@@ -30,16 +24,6 @@ def dump_data(data: Any, path: str) -> None:
 def read_data(path: str) -> Any:
     with open(path, "rb") as file:
         return pickle.load(file)
-
-# # --- PRZYKŁAD UŻYCIA ---
-# moje_dane = {"identyfikator": 123, "wartosci": [1.5, 2.5, 3.5]}
-
-# # Zapis
-# dump_data(moje_dane, "magazyn.pkl")
-
-# # Odczyt
-# wczytane_dane = read_data("magazyn.pkl")
-# print(wczytane_dane)
 
 
 def AV(profile: ApprovalProfile):
@@ -54,14 +38,66 @@ def AV(profile: ApprovalProfile):
     ranking = [item[0] for item in scores]
     return ranking
 
-# ballots = [ApprovalBallot(approvals=["A","B","C","D"]),
-#            ApprovalBallot(approvals=["D","B","C"]),
-#            ApprovalBallot(approvals=["B","C"]),
-#            ApprovalBallot(approvals=["C"])]
 
-# profile = ApprovalProfile(ballots=ballots, candidates=["A","B","C","D"])
+def Seq_Thile(profile: ApprovalProfile, w: list[float | int] | str = "SeqPav"):
+    if type(w) == str:
+        if w == "SeqPav":
+            w = [1/(i+1) for i in range(len(profile.candidates))]
+        elif w == "AV":
+            w = [1.0] * len(profile.candidates)
+        elif w == "GreedyCC":
+            w = [1.0] + [0.0] * (len(profile.candidates) - 1)
+        elif w.endswith("-Geometric"):
+            prefix = w[:-10]
+            frac = Fraction(prefix)
+            if frac.denominator == 1:
+                p = int(frac)    
+            else:
+                p = float(frac)
 
-# print(AV(profile))
+            if p <= 1:
+                raise ValueError(f"Geometric weight parameter p must be greater than 1, got {p}")
+                
+            w = [1 / p**(i+1) for i in range(len(profile.candidates))]
+        else:
+            raise ValueError(f"Unknown weight type: {w}")
+    if w is None:
+        raise ValueError("Weight vector w cannot be None")
+    else:
+        w = w
+
+    w_acc = [0] + w.copy()
+    for i in range(1, len(w_acc)):
+        w_acc[i] += w_acc[i-1]
+
+    approval_sets = [set(ballot.approvals) for ballot in profile.ballots if ballot.approvals]
+
+    elected_candidates = []
+    not_elected_candidates = list(profile.candidates)
+    current_ranking = []
+    for _ in range(len(profile.candidates)):
+        max_score = float('-inf')
+        best_candidate = None
+        for c in not_elected_candidates:
+            current_ranking.append(c)
+            current_ranking_set = set(current_ranking)
+            w_score = 0
+            for approval_set in approval_sets:
+                n = len(approval_set & current_ranking_set)
+                w_score += w_acc[n]
+
+            if w_score > max_score:
+                max_score = w_score
+                best_candidate = c
+
+            current_ranking.pop(-1)
+
+        elected_candidates.append(best_candidate)
+        current_ranking.append(best_candidate)
+        not_elected_candidates.remove(best_candidate)
+            
+
+    return elected_candidates
 
 
 
@@ -125,9 +161,63 @@ def experiment_1_generate_datasets(path, gen_params: ProfileGeneratingConfig, ge
 
 
 
-def experiment_1_one_rule(path_to_profiles, path_to_results, rule, *, n_jobs=1, verbose=True):
+
+import os
+import random
+import logging
+import pandas as pd
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
+def process_single_file(args):
+    """Pomocnicza funkcja wykonująca obliczenia dla pojedynczego pliku `.pkl` w osobnym procesie."""
+    file, path_to_profiles, rule, rule_args, n_profiles_per_file = args
+    dataset_path = os.path.join(path_to_profiles, file)
+    profiles = read_data(dataset_path)
+
+    if n_profiles_per_file >= 1:
+        n_profiles_per_file = min(n_profiles_per_file, len(profiles))  
+    elif n_profiles_per_file == -1:
+        n_profiles_per_file = len(profiles)
+    elif n_profiles_per_file < -1:
+        n_profiles_per_file = -int(len(profiles) / n_profiles_per_file)
+    
+    local_result_points = []
+    for profile in profiles[:n_profiles_per_file]:
+        ranking = rule(profile, **rule_args)
+        candidates = len(profile.candidates)
+        n_voters = len(profile.ballots)
+
+        for voters_group in get_cohesive_voter_groups(profile):
+            voters_group_size = len(voters_group)
+            ballot_group = [profile.ballots[voter_num] for voter_num in voters_group]
+            for k in range(1, candidates + 1):
+                avg_d_b_jd = avg_devided_by_jd(ballot_group, ranking[:k], k, n_voters)
+                if avg_d_b_jd is not None and avg_d_b_jd < 1:
+                    local_result_points.append({
+                        "file": file,
+                        "a": voters_group_size / n_voters, 
+                        "y_r": avg_d_b_jd,
+                        "k": k,
+                        "rule": rule.__name__,
+                        "candidates": candidates,
+                        "n_voters": n_voters
+                    })
+                    
+    return file, local_result_points
+
+
+
+
+def experiment_1_one_rule(path_to_profiles, path_to_results, rule, *, rule_args={}, n_profiles_per_file=-1, n_jobs=1, verbose=True):
     log_level = logging.INFO if verbose else logging.WARNING
     logging.basicConfig(level=log_level, format='%(message)s')
+
+    if n_jobs == 1:
+        pass  
+    elif n_jobs == -1:
+        n_jobs = os.cpu_count()
+    elif n_jobs < -1:
+        n_jobs = -int(os.cpu_count() / n_jobs)
 
     profiles_to_process = 0
     for file in os.listdir(path_to_profiles):
@@ -135,37 +225,119 @@ def experiment_1_one_rule(path_to_profiles, path_to_results, rule, *, n_jobs=1, 
             dataset_path = os.path.join(path_to_profiles, file)
             profiles_to_process += len(read_data(dataset_path))
 
-    result_points = []
-    profiles_processed = 0
+    file_path = path_to_results.with_name(f"{path_to_results.stem}_files_processed.csv")
+    if file_path.exists():
+        files_processed_list = pd.read_csv(file_path).to_dict('records')
+    else:
+        files_processed_list = []
 
-    files = os.listdir(path_to_profiles)
+    if path_to_results.exists():
+        try:
+            result_points = pd.read_csv(path_to_results).to_dict('records')
+        except Exception:
+            result_points = []
+    else:
+        result_points = []
 
-    random.shuffle(files)
-    
-    for file in files:
-        if file.endswith(".pkl"):
-            dataset_path = os.path.join(path_to_profiles, file)
-            profiles = read_data(dataset_path)
-            for i, profile in enumerate(profiles):
-                profiles_processed += 1
-                if profiles_processed % 100 == 0:
-                    logging.info(f"Calculations completion [{(profiles_processed)/profiles_to_process:.2%}]")
-                    save_data(path_to_results, result_points)   
+    processed_files_set = {item["file"] for item in files_processed_list}
+    files = [f for f in os.listdir(path_to_profiles) if f.endswith(".pkl") and f not in processed_files_set]
 
-                ranking = rule(profile)
-                candidates = len(profile.candidates)
-                n_voters = len(profile.ballots)
+    profiles_processed = sum(len(read_data(os.path.join(path_to_profiles, item["file"]))) for item in files_processed_list if os.path.exists(os.path.join(path_to_profiles, item["file"])))
 
-                for voters_group in get_cohesive_voter_groups(profile):
-                    viters_group_size = len(voters_group)
-                    ballot_group = [profile.ballots[voter_num] for voter_num in voters_group]
-                    for k in range(1,candidates+1):
-                        avg_d_b_jd = avg_devided_by_jd(ballot_group, ranking[:k], k, n_voters)
-                        if avg_d_b_jd is not None and avg_d_b_jd < 1:
-                            result_points.append({ "a": viters_group_size / n_voters, "y_r": avg_d_b_jd })
+    with ProcessPoolExecutor(max_workers=n_jobs) as executor:
+        future_to_file = {
+            executor.submit(process_single_file, (file, path_to_profiles, rule, rule_args, n_profiles_per_file)): file 
+            for file in files
+        }
+
+        for future in as_completed(future_to_file):
+            file = future_to_file[future]
+            try:
+                completed_file, local_points = future.result()
+                
+                result_points.extend(local_points)
+                files_processed_list.append({"file": completed_file})
+                
+                dataset_path = os.path.join(path_to_profiles, completed_file)
+                profiles_processed += len(read_data(dataset_path))
+
+                if profiles_to_process > 0:
+                    progress_pct = profiles_processed / profiles_to_process
+                    logging.info(f"Calculations completion [{progress_pct:.2%}] (Completed {completed_file})")
+                
+                # save_data(file_path, files_processed_list)
+                # save_data(path_to_results, result_points)
+
+            except Exception as exc:
+                logging.error(f"File {file} generated an exception: {exc}")
 
     save_data(path_to_results, result_points)
-    logging.info(f"Completed calculations for {file}")
+    logging.info(f"Completed calculations for all files -> {path_to_results}")
+
+
+# def experiment_1_one_rule(path_to_profiles, path_to_results, rule, *, n_jobs=1, verbose=True):
+#     log_level = logging.INFO if verbose else logging.WARNING
+#     logging.basicConfig(level=log_level, format='%(message)s')
+
+#     profiles_to_process = 0
+#     for file in os.listdir(path_to_profiles):
+#         if file.endswith(".pkl"):
+#             dataset_path = os.path.join(path_to_profiles, file)
+#             profiles_to_process += len(read_data(dataset_path))
+
+#     result_points = []
+#     profiles_processed = 0
+#     file_path = path_to_results.with_name(f"{path_to_results.stem}_files_processed.csv")
+#     if file_path.exists():
+#         files_processed_list = pd.read_csv(file_path).to_dict('records')
+#     else:
+#         files_processed_list = []
+
+#     files = os.listdir(path_to_profiles)
+
+#     files = list(set(files) - set([item["file"] for item in files_processed_list]))
+
+#     random.shuffle(files)
+    
+#     for f, file in enumerate(files):
+#         if file.endswith(".pkl"):
+#             dataset_path = os.path.join(path_to_profiles, file)
+#             profiles = read_data(dataset_path)
+#             files_processed_list.append({ "file": file})
+#             for i, profile in enumerate(profiles):
+#                 profiles_processed += 1
+#                 if profiles_processed % 100 == 0:
+#                     logging.info(f"Calculations completion [{(profiles_processed)/profiles_to_process:.2%}]")
+#                     save_data(file_path, files_processed_list) 
+#                     save_data(path_to_results, result_points)   
+
+#                 ranking = rule(profile)
+#                 candidates = len(profile.candidates)
+#                 n_voters = len(profile.ballots)
+
+#                 for voters_group in get_cohesive_voter_groups(profile):
+#                     viters_group_size = len(voters_group)
+#                     ballot_group = [profile.ballots[voter_num] for voter_num in voters_group]
+#                     for k in range(1,candidates+1):
+#                         avg_d_b_jd = avg_devided_by_jd(ballot_group, ranking[:k], k, n_voters)
+#                         if avg_d_b_jd is not None and avg_d_b_jd < 1:
+#                             result_points.append({ "a": viters_group_size / n_voters, "y_r": avg_d_b_jd })
+
+#     save_data(path_to_results, result_points)
+#     logging.info(f"Completed calculations for {file}")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # results = []
     # for i, m in enumerate(candidates):
@@ -215,3 +387,9 @@ def experiment_1_one_rule(path_to_profiles, path_to_results, rule, *, n_jobs=1, 
 
 #     dump_data(result_points,"result_points.pkl")
 #     return result_points
+
+
+
+
+
+# print(Seq_Thile(ApprovalProfile(candidates=["A", "B", "C"], ballots=[ApprovalBallot(approvals=["A", "B"]), ApprovalBallot(approvals=["B", "C"]), ApprovalBallot(approvals=["A", "C"])]), w="5/4-Geometric"))
