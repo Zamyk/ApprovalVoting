@@ -146,6 +146,59 @@ def Reverse_Seq_PAV(profile: ApprovalProfile):
 
 # print(Reverse_Seq_PAV(profile))
 
+def Phragmen(profile: ApprovalProfile):
+    candidate_approval_voters_sets = {c: set() for c in profile.candidates}
+    for i, ballot in enumerate(profile.ballots):
+        for candidate in ballot.approvals:
+            candidate_approval_voters_sets[candidate].add(i)
+
+    not_elected_candidates = list(profile.candidates)
+
+    voters_loads = {i: 0 for i in range(len(profile.ballots))}
+
+    ranking = []
+
+    for _ in range(len(profile.candidates)):
+        max_load = float('inf')
+        best_candidate = None
+        best_candidate_loads = None
+        for c in not_elected_candidates:
+            n = len(candidate_approval_voters_sets[c])
+            if n == 0:
+                new_load = None
+            else:
+                approving_voters_loads=sorted([voters_loads[i] for i in candidate_approval_voters_sets[c]])
+                approving_voters_loads.append(float('inf'))
+                summed_load = 1
+                new_load = None
+                for j in range(n):
+                    summed_load += approving_voters_loads[j]
+                    if summed_load / (j + 1) < approving_voters_loads[j+1]:
+                        new_load = summed_load / (j + 1)
+                        break
+
+            voters_loads_copy = voters_loads.copy()
+            for voter in candidate_approval_voters_sets[c]:
+                voters_loads_copy[voter] = max(voters_loads_copy[voter], new_load)
+
+            if new_load is not None and new_load < max_load:
+                max_load = new_load
+                best_candidate = c
+                best_candidate_loads = voters_loads_copy
+
+        if best_candidate is None:
+            best_candidate = not_elected_candidates[0]
+            best_candidate_loads = voters_loads.copy()
+
+        ranking.append(best_candidate)
+        voters_loads = best_candidate_loads
+        print(voters_loads)
+        not_elected_candidates.remove(best_candidate)
+
+    return ranking
+
+
+
 def save_data(path, data):
     df = pd.DataFrame(data)
     df.to_csv(path, index=False)
