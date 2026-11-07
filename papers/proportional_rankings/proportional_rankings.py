@@ -199,6 +199,28 @@ def Phragmen(profile: ApprovalProfile):
 
 
 
+def Best_of(profile: ApprovalProfile, rule_args: list[tuple[Callable[[ApprovalProfile], list[str]], dict]]):
+    best_ranking = None
+    best_score = -float('inf')
+
+    for rule, args in rule_args:
+        ranking = rule(profile, **args)
+        rule_score = float('inf')
+        for voters_group in get_cohesive_voter_groups(profile):
+            ballot_group = [profile.ballots[voter_num] for voter_num in voters_group]
+            for k in range(1, len(profile.candidates) + 1):
+                avg_d_b_jd = avg_devided_by_jd(ballot_group, ranking[:k], k, len(profile.ballots))
+                if avg_d_b_jd is not None:
+                    rule_score = min(rule_score, avg_d_b_jd)
+
+        if rule_score > best_score:
+            best_score = rule_score
+            best_ranking = ranking
+
+    return best_ranking
+
+
+
 def save_data(path, data):
     df = pd.DataFrame(data)
     df.to_csv(path, index=False)

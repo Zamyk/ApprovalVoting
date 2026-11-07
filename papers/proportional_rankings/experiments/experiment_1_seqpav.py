@@ -9,7 +9,8 @@ from votekit.ballot_generator.std_generator.approval_impartial_culture import ap
 PARAMS = {
     "path_to_results": RESULTS_DIRECTORY_PATH / "experiment_1_seqpav.csv",
     "path_to_profiles": DATASETS_DIRECTORY_PATH,
-    "rule": partial(Seq_Thile, w="SeqPav"),
+    "rule": Seq_Thile,
+    "rule_args": {"w": "SeqPav"},
     "n_jobs": -1,
     "verbose": True
 }
