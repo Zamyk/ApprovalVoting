@@ -4,10 +4,14 @@ from pathlib import Path
 
 import numpy as np
 
+import votekit.elections.election_types.approval.hamming as approval_module
 from papers.utils.pabulib import pabulib_to_votekit
 from papers.utils.votekit_utils import sample_approval_profile
-from ..manipulation_of_hamming import get_manipulability_ratio_oneprofile, orness, save_data
+from ..manipulation_of_hamming import _get_weights_on_int, get_manipulability_ratio_oneprofile, orness, save_data
 from . import RESULTS_DIRECTORY_PATH
+
+# integer weights (avoids floating point ties), same as the other integer experiments
+approval_module._get_hamming_weights = _get_weights_on_int
 
 DATA = Path(__file__).resolve().parent / "data"
 
@@ -29,7 +33,8 @@ DATASETS = [
   },
 ]
 
-N_VOTERS = 25
+VOTER_COUNTS = [25, 50, 100]
+N_VOTERS = VOTER_COUNTS[0]
 N_ITERATIONS = 20000
 SEED = 0
 N_JOBS = -3
@@ -72,7 +77,7 @@ def run_experiment_pabulib(
   n_jobs=N_JOBS,
   verbose=True,
 ):
-  path = Path(path) if path else RESULTS_DIRECTORY_PATH / "experiment_pabulib"
+  path = Path(path) if path else RESULTS_DIRECTORY_PATH / f"experiment_pabulib_integers_oneprofile_n{n_voters}"
   datasets = datasets or DATASETS
   print(f"Starting experiment_pabulib | time: {datetime.now()}", flush=True)
   results = []
@@ -95,4 +100,5 @@ def run_experiment_pabulib(
 
 
 if __name__ == "__main__":
-  run_experiment_pabulib()
+  for n in VOTER_COUNTS:
+    run_experiment_pabulib(n_voters=n)

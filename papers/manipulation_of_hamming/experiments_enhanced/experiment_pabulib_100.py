@@ -2,7 +2,7 @@ from . import RESULTS_DIRECTORY_PATH
 from .experiment_pabulib import N_JOBS, SEED, run_experiment_pabulib
 
 N_VOTERS = 100
-N_ITERATIONS = 2000
+N_ITERATIONS = 20000
 
 
 def run_experiment_pabulib_100(
@@ -10,7 +10,7 @@ def run_experiment_pabulib_100(
 ):
   """Same as experiment_pabulib, but each profile is 100 voters sampled uniformly
   (without replacement) from the full pabulib election."""
-  path = path or RESULTS_DIRECTORY_PATH / "experiment_pabulib_100"
+  path = path or RESULTS_DIRECTORY_PATH / f"experiment_pabulib_integers_oneprofile_n{n_voters}"
   return run_experiment_pabulib(
     path=path,
     n_voters=n_voters,

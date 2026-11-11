@@ -3,13 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from . import RESULTS_DIRECTORY_PATH, PLOTS_DIRECTORY_PATH
-
-STYLE = {
-    "f_2n_3": {"ls": (0, (4, 3)), "lw": 2.2, "label": r"$\mathbf{f^{2n/3}}$"},
-    "Borda": {"ls": (0, (1, 2)), "lw": 2.2, "label": r"$\mathbf{Borda}$"},
-    "f_n_2": {"ls": (0, (5, 5)), "lw": 1.2, "label": r"$\mathbf{f^{n/2}}$"},
-    "f_n_3": {"ls": (0, (1, 3)), "lw": 1.2, "label": r"$\mathbf{f^{n/3}}$"},
-}
+from ._plot_common import F_STYLES as STYLE
 
 
 def plot_experiment_ic_probability(path=None, save=None, show=True, title="Impartial Culture"):
