@@ -17,6 +17,7 @@ import time
 from datetime import datetime
 
 from rich.console import Console
+from rich.markup import escape
 from rich.table import Table
 
 from .spec import ROOT
@@ -92,6 +93,35 @@ def _terminate(proc):
         proc.terminate()
 
 
+PROGRESS_EVERY = 60     # seconds between progress lines while a task runs
+
+
+def _last_line(log_path):
+    """Last non-empty line of a task log (what the experiment printed most recently)."""
+    try:
+        with open(log_path, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            f.seek(max(0, f.tell() - 4096))
+            lines = f.read().decode(errors="replace").replace("\r", "\n").splitlines()
+    except OSError:
+        return ""
+    return next((line.strip() for line in reversed(lines) if line.strip()), "")
+
+
+def _wait(proc, log_path, started, console):
+    """Wait for the process; every PROGRESS_EVERY seconds print the log's newest line if it changed."""
+    shown = ""
+    while True:
+        try:
+            return proc.wait(timeout=PROGRESS_EVERY)
+        except subprocess.TimeoutExpired:
+            line = _last_line(log_path)
+            if line and line != shown:
+                shown = line
+                console.print(f"    [dim]{fmt_duration(time.monotonic() - started)}[/]  {escape(line)}",
+                              highlight=False)
+
+
 def _tail_hint(log_path):
     if os.name == "nt":
         return f"Get-Content -Wait {log_path}"
@@ -141,7 +171,7 @@ def execute(tasks, registry_order, *, nice=19, dry_run=False, show_plan=True, co
             proc = subprocess.Popen(_command(task), cwd=ROOT, env=env, stdout=log,
                                     stderr=subprocess.STDOUT, **priority)
             try:
-                code = proc.wait()
+                code = _wait(proc, log_path, started, console)
             except KeyboardInterrupt:
                 _terminate(proc)
                 try:

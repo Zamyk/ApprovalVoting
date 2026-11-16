@@ -96,7 +96,7 @@ def start_detached(tasks, args, console):
                    | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0x200)}
     else:
         options = {"start_new_session": True}
-    env = {**os.environ, "PYTHONUNBUFFERED": "1"}
+    env = {**os.environ, "PYTHONUNBUFFERED": "1", "COLUMNS": "200"}   # no 80-column wrapping in the file
     with open(out, "w") as log:
         proc = subprocess.Popen(cmd, cwd=ROOT, env=env, stdin=subprocess.DEVNULL,
                                 stdout=log, stderr=subprocess.STDOUT, **options)

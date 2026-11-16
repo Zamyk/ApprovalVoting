@@ -1,6 +1,6 @@
 import os
 from . import RESULTS_DIRECTORY_PATH
-from ..manipulation_of_hamming import variable_voters_tests
+from ..manipulation_of_hamming import experiment_2
 from votekit.ballot_generator.std_generator.approval_impartial_culture import approval_ic_profile_generator, approval_biased_profile_generator
 
 
@@ -25,7 +25,7 @@ PARAMS = {
 
 def run_experiment_2():
     print(f"Starting experiment_2")
-    variable_voters_tests(**PARAMS)
+    experiment_2(**PARAMS)
     print(f"Completed experiment_2")
 
 

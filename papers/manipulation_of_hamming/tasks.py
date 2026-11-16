@@ -81,6 +81,10 @@ TASKS = [
               pair("experiment_2_euclidean_integers", "normal", "triangle")),
     *enhanced("exp2", "euclidean-uniform-integers", "experiment_2_euclidean_uniform_integers",
               pair("experiment_2_euclidean_uniform_integers", "normal", "triangle")),
+    *enhanced("exp2", "resampling-integers", "experiment_2_resampling_integers",
+              [f"experiment_2_resampling_integers_{t}.csv" for t in ("phi03", "phi05", "phi08")],
+              figures=[f"plot_experiment_2_resampling_integers_{t}.png" for t in ("phi03", "phi05", "phi08")],
+              note="(p, phi)-resampling, p=0.5, phi in {0.3, 0.5, 0.8}; one figure per phi"),
     *enhanced("exp2", "iterations", "experiment_2_iterations", ["experiment_2_iterations_*.csv"],
               note="many repeated runs, plotted as a min-max band"),
 
@@ -101,13 +105,11 @@ TASKS = [
         data=[f"{ORIG_DIR}/results/experiment_1_uniform.csv",
               f"{ORIG_DIR}/results/experiment_1_biased.csv"],
         figures=[f"{ORIG_DIR}/plots/plot_experiment_1_uniform_and_biased.png"],
-        broken="imports tests(), renamed to experiment_1() in commit 986b7ae",
     ),
     *experiment(
         PAPER, "original", "exp2",
         run=f"{ORIGINAL}.experiment_2", plot=f"{ORIGINAL}.plot_experiment_2",
         data=[f"{ORIG_DIR}/results/experiment_2.csv"],
         figures=[f"{ORIG_DIR}/plots/plot_experiment_2.png"],
-        broken="imports variable_voters_tests(), renamed to experiment_2() in commit 986b7ae",
     ),
 ]
