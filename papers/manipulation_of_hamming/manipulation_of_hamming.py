@@ -16,7 +16,7 @@ def orness(n, fi):
 
 
 def get_elected_committee(profile, weights_type="minisum"):
-    election = OrderedWeightedHamming(profile=profile, weights=weights_type)
+    election = OrderedWeightedHamming(profile=profile, hamming_weights=weights_type)
     elected_tuple = election.get_elected()
     if not elected_tuple:
         return np.array([0 for c in profile.candidates])
@@ -59,11 +59,13 @@ def _single_iteration(args):
     return 0
 
 
-def get_manipulability_ratio(candidates, n_voters, gen, weights_type, n_iterations, *, n_jobs=1):
+def get_manipulability_ratio(candidates, n_voters, gen, weights_type, n_iterations, *, n_jobs=1, per_voter=False):
+    """Share of profiles where some voter can manipulate; with ``per_voter`` the share of voters who can."""
     args = [(candidates, n_voters, weights_type, gen)] * n_iterations
+    worker = _single_iteration_e4_e5 if per_voter else _single_iteration
 
     if n_jobs == 1:
-        results = [_single_iteration(arg) for arg in args]
+        results = [worker(arg) for arg in args]
     else:
         if n_jobs == -1:
             n_jobs = os.cpu_count()
@@ -71,9 +73,9 @@ def get_manipulability_ratio(candidates, n_voters, gen, weights_type, n_iteratio
             n_jobs = -int(os.cpu_count() / n_jobs)
 
         with ProcessPoolExecutor(max_workers=n_jobs) as executor:
-            results = list(executor.map(_single_iteration, args, chunksize=max(1, n_iterations // (n_jobs * 4))))
+            results = list(executor.map(worker, args, chunksize=max(1, n_iterations // (n_jobs * 4))))
 
-    return sum(results) / n_iterations
+    return sum(results) / n_iterations / (n_voters if per_voter else 1)
 
 
 def save_data(path, data):
@@ -81,7 +83,7 @@ def save_data(path, data):
     df.to_csv(path, index=False)
 
 
-def experiment_1(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, verbose=True):
+def experiment_1(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, verbose=True, integer_weights=False, per_voter=False):
     log_level = logging.INFO if verbose else logging.WARNING
     logging.basicConfig(level=log_level, format='%(message)s')
 
@@ -89,7 +91,7 @@ def experiment_1(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, ver
     for i, m in enumerate(candidates):
         inner_candidates = [str(k) for k in range(m)]
         for j, fi in enumerate(range(n_voters)):
-            manipulability_ratio = get_manipulability_ratio(inner_candidates, n_voters, gen, ("f", fi), n_iterations, n_jobs=n_jobs)
+            manipulability_ratio = get_manipulability_ratio(inner_candidates, n_voters, gen, resolve_weights(("f", fi), n_voters, integer_weights), n_iterations, n_jobs=n_jobs, per_voter=per_voter)
             results.append({
                 'm': m,
                 'orness': orness(n_voters, fi),
@@ -100,14 +102,14 @@ def experiment_1(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, ver
     save_data(path.with_suffix(".csv"), results)
 
 
-def experiment_2(path, voters, n_iterations, candidates, gen, weights, *, n_jobs=1, verbose=True):
+def experiment_2(path, voters, n_iterations, candidates, gen, weights, *, n_jobs=1, verbose=True, integer_weights=False, per_voter=False):
     log_level = logging.INFO if verbose else logging.WARNING
     logging.basicConfig(level=log_level, format='%(message)s')
 
     results = []
     for i, (name, w) in enumerate(weights):
         for j, n in enumerate(voters):
-            manipulability_ratio = get_manipulability_ratio(candidates, n, gen, w(n), n_iterations, n_jobs=n_jobs)
+            manipulability_ratio = get_manipulability_ratio(candidates, n, gen, resolve_weights(w(n), n, integer_weights), n_iterations, n_jobs=n_jobs, per_voter=per_voter)
             results.append({
                 'f': name,
                 'n': n,
@@ -116,6 +118,18 @@ def experiment_2(path, voters, n_iterations, candidates, gen, weights, *, n_jobs
             logging.info(f"Calculations completion [{(i*len(voters)+j+1)/(len(weights)*len(voters)):.2%}]")
         logging.info(f"Completed calculations for weight {name}")
     save_data(path.with_suffix(".csv"), results)
+
+
+def resolve_weights(weights, n, integer_weights=False):
+    """Weights as passed to OrderedWeightedHamming.
+
+    With ``integer_weights`` the spec ("minisum", ("f", i), ...) is turned into an explicit numpy
+    array of integers (unnormalised: 1/0 or n..1), which VoteKit accepts as is. Integer weights
+    make ties between committees exact instead of depending on floating point rounding.
+    """
+    if not integer_weights:
+        return weights
+    return _get_weights_on_int(weights, n)
 
 
 def _get_weights_on_int(weights, n):
@@ -143,22 +157,6 @@ def _single_iteration_e4_e5(args):
             manipulating_voters += 1
     return manipulating_voters
 
-def get_manipulability_ratio_e4_e5(candidates, n_voters, gen, weights_type, n_iterations, *, n_jobs=1):
-    args = [(candidates, n_voters, weights_type, gen)] * n_iterations
-
-    if n_jobs == 1:
-        results = [_single_iteration_e4_e5(arg) for arg in args]
-    else:
-        if n_jobs == -1:
-            n_jobs = os.cpu_count()
-        elif n_jobs < -1:
-            n_jobs = -int(os.cpu_count() / n_jobs)
-
-        with ProcessPoolExecutor(max_workers=n_jobs) as executor:
-            results = list(executor.map(_single_iteration_e4_e5, args, chunksize=max(1, n_iterations // (n_jobs * 4))))
-
-    return sum(results) / n_iterations / n_voters
-
 def _single_iteration_oneprofile(args):
     """Module-level function required for pickling with multiprocessing."""
     candidates, n_voters, weights_type, profile = args
@@ -168,11 +166,19 @@ def _single_iteration_oneprofile(args):
     return 0
 
 
-def get_manipulability_ratio_oneprofile(candidates, n_voters, weights_type, profiles, *, n_jobs=1):
+def _single_iteration_oneprofile_per_voter(args):
+    """Module-level function required for pickling with multiprocessing."""
+    candidates, n_voters, weights_type, profile = args
+    return sum(can_voter_manipulate(i, profile, weights_type) for i in range(n_voters))
+
+
+def get_manipulability_ratio_oneprofile(candidates, n_voters, weights_type, profiles, *, n_jobs=1, per_voter=False):
+    """Same as get_manipulability_ratio, but on given profiles."""
     args = [(candidates, n_voters, weights_type, profile) for profile in profiles]
+    worker = _single_iteration_oneprofile_per_voter if per_voter else _single_iteration_oneprofile
 
     if n_jobs == 1:
-        results = [_single_iteration_oneprofile(arg) for arg in args]
+        results = [worker(arg) for arg in args]
     else:
         if n_jobs == -1:
             n_jobs = os.cpu_count()
@@ -180,11 +186,11 @@ def get_manipulability_ratio_oneprofile(candidates, n_voters, weights_type, prof
             n_jobs = -int(os.cpu_count() / n_jobs)
 
         with ProcessPoolExecutor(max_workers=n_jobs) as executor:
-            results = list(executor.map(_single_iteration_oneprofile, args, chunksize=max(1, len(profiles) // (n_jobs * 4))))
+            results = list(executor.map(worker, args, chunksize=max(1, len(profiles) // (n_jobs * 4))))
 
-    return sum(results) / len(profiles)
+    return sum(results) / len(profiles) / (n_voters if per_voter else 1)
 
-def experiment_1_oneprofile(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, verbose=True):
+def experiment_1_oneprofile(path, n_voters, n_iterations, candidates, gen, *, n_jobs=1, verbose=True, integer_weights=False, per_voter=False):
     log_level = logging.INFO if verbose else logging.WARNING
     logging.basicConfig(level=log_level, format='%(message)s')
 
@@ -193,7 +199,7 @@ def experiment_1_oneprofile(path, n_voters, n_iterations, candidates, gen, *, n_
         inner_candidates = [str(k) for k in range(m)]
         profiles = [gen(inner_candidates, n_voters) for _ in range(n_iterations)]
         for j, fi in enumerate(range(n_voters)):
-            manipulability_ratio = get_manipulability_ratio_oneprofile(inner_candidates, n_voters, ("f", fi), profiles, n_jobs=n_jobs)
+            manipulability_ratio = get_manipulability_ratio_oneprofile(inner_candidates, n_voters, resolve_weights(("f", fi), n_voters, integer_weights), profiles, n_jobs=n_jobs, per_voter=per_voter)
             results.append({
                 'm': m,
                 'orness': orness(n_voters, fi),
