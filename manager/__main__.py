@@ -1,4 +1,9 @@
 import argparse
+import glob
+import os
+import subprocess
+import sys
+from datetime import datetime
 
 from rich.console import Console
 from rich.tree import Tree as RichTree
@@ -16,6 +21,8 @@ def build_parser():
     common.add_argument("--dry-run", action="store_true", help="show the plan, run nothing")
     common.add_argument("--yes", "-y", action="store_true", help="don't ask before starting")
     common.add_argument("--nice", type=int, default=19, help="nice level for run tasks (default 19)")
+    common.add_argument("--detach", "-d", action="store_true",
+                        help="start in the background and return (survives closing the terminal / ssh)")
 
     parser = argparse.ArgumentParser(
         prog="manager", description="Tick what to run and plot. No subcommand: interactive tree.")
@@ -72,25 +79,61 @@ def cmd_check(registry, console):
     return 1 if problems else 0
 
 
+def start_detached(tasks, args, console):
+    """Re-run the selected tasks in a separate session, so closing the terminal does not stop them."""
+    out_dir = ROOT / ".manager" / "runs"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out = out_dir / (datetime.now().strftime("%Y%m%d-%H%M%S") + ".out")
+
+    cmd = [sys.executable, "-m", "manager"]
+    for directory in args.papers_dir or []:
+        cmd += ["--papers-dir", directory]
+    cmd += ["run", *[glob.escape(t.id) for t in tasks], "-y", "--nice", str(args.nice)]
+
+    if os.name == "nt":
+        # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+        options = {"creationflags": getattr(subprocess, "DETACHED_PROCESS", 0x8)
+                   | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0x200)}
+    else:
+        options = {"start_new_session": True}
+    env = {**os.environ, "PYTHONUNBUFFERED": "1"}
+    with open(out, "w") as log:
+        proc = subprocess.Popen(cmd, cwd=ROOT, env=env, stdin=subprocess.DEVNULL,
+                                stdout=log, stderr=subprocess.STDOUT, **options)
+
+    rel = out.relative_to(ROOT)
+    console.print(f"started in the background (pid {proc.pid}), {len(tasks)} task(s)")
+    console.print(f"progress: tail -f {rel}" if os.name != "nt" else f"progress: Get-Content -Wait {rel}")
+    if os.name != "nt":
+        console.print(f"stop everything: kill -- -{proc.pid}")
+    return 0
+
+
 def confirm_and_run(tasks, registry, args, console):
     order = {t.id: i for i, t in enumerate(registry.tasks)}
     plan = plan_order(tasks, order)
     print_plan(plan, console)
     if args.dry_run:
         return 0
+    detach = args.detach
     if not args.yes:
+        prompt = ("Enter to start in the background, Ctrl-C to abort: " if detach else
+                  "Enter: run here   b: run in the background   Ctrl-C: abort: ")
         try:
-            input("Enter to start, Ctrl-C to abort: ")
+            answer = input(prompt)
         except (KeyboardInterrupt, EOFError):
             console.print("\naborted")
             return 1
+        detach = detach or answer.strip().lower() == "b"
+    if detach:
+        return start_detached(tasks, args, console)
     return execute(tasks, order, nice=args.nice, show_plan=False, console=console)
 
 
 def main(argv=None):
     args = build_parser().parse_args(argv)
     # no subcommand = interactive tree with default options
-    for name, default in (("dry_run", False), ("yes", False), ("nice", 19)):
+    for name, default in (("dry_run", False), ("yes", False), ("nice", 19), ("detach", False)):
         if not hasattr(args, name):
             setattr(args, name, default)
 

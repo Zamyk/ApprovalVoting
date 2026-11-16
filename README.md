@@ -17,10 +17,12 @@ Opens a tree of papers, experiments and their `run` / `plot` tasks, with the sta
 | `a` / `n` | tick all / none |
 | `s` | tick what needs work (no data, partial data, missing or stale plot) |
 | `r` | refresh status |
-| `g` | go: show the plan, press Enter to start |
+| `g` | go: show the plan, then `Enter` runs here, `b` + Enter runs in the background |
 | `q` | quit |
 
 Runs go first, then plots. Each task is a separate process, `python -m <module>`, run from the repo root. Run tasks get a low priority (nice 19, `--nice N` to change). Logs are in `.manager/logs/`.
+
+Background run (keeps going after ssh disconnects): press `b` at the prompt, or use `--detach`. It prints the progress file (`.manager/runs/<time>.out`) and a `kill` command to stop everything.
 
 Without the tree:
 
@@ -28,6 +30,7 @@ Without the tree:
 uv run python -m manager list                      # tree with status
 uv run python -m manager run 'paper/exp1/*' -y     # by id, glob or prefix
 uv run python -m manager run '*:plot' --dry-run    # only show the plan
+uv run python -m manager run 'paper/exp1/*' -y -d  # start in the background
 uv run python -m manager check                     # manifests point at real modules
 ```
 
