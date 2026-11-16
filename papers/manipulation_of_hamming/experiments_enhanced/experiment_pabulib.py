@@ -4,14 +4,10 @@ from pathlib import Path
 
 import numpy as np
 
-import votekit.elections.election_types.approval.hamming as approval_module
 from papers.utils.pabulib import pabulib_to_votekit
 from papers.utils.votekit_utils import sample_approval_profile
-from ..manipulation_of_hamming import _get_weights_on_int, get_manipulability_ratio_oneprofile, orness, save_data
+from ..manipulation_of_hamming import get_manipulability_ratio_oneprofile, orness, resolve_weights, save_data
 from . import RESULTS_DIRECTORY_PATH
-
-# integer weights (avoids floating point ties), same as the other integer experiments
-approval_module._get_hamming_weights = _get_weights_on_int
 
 DATA = Path(__file__).resolve().parent / "data"
 
@@ -56,7 +52,7 @@ def run_dataset(profile, label, n_voters=N_VOTERS, n_iterations=N_ITERATIONS, se
   rows = []
   for fi in range(n_voters):
     ratio = get_manipulability_ratio_oneprofile(
-      candidates, n_voters, ("f", fi), profiles, n_jobs=n_jobs
+      candidates, n_voters, resolve_weights(("f", fi), n_voters, True), profiles, n_jobs=n_jobs
     )
     rows.append({
       "label": label,

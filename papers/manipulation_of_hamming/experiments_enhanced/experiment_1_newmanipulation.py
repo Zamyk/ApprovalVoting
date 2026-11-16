@@ -1,9 +1,6 @@
 import os
 from datetime import datetime
 from . import RESULTS_DIRECTORY_PATH
-import papers.manipulation_of_hamming.manipulation_of_hamming as manipulation_module
-from ..manipulation_of_hamming import get_manipulability_ratio_e4_e5
-manipulation_module.get_manipulability_ratio = get_manipulability_ratio_e4_e5
 from votekit.ballot_generator.std_generator.approval_impartial_culture import approval_ic_profile_generator, approval_biased_profile_generator
 from ..manipulation_of_hamming import experiment_1
 
@@ -15,6 +12,7 @@ PARAMS_1 = {
     "candidates": [3, 4, 5],
     "gen": approval_ic_profile_generator,
     "n_jobs": -3,
+    "per_voter": True,
     "verbose": True
 }
 
@@ -25,6 +23,7 @@ PARAMS_2 = {
     "candidates": [3, 4, 5],
     "gen": approval_biased_profile_generator,
     "n_jobs": -3,
+    "per_voter": True,
     "verbose": True
 }
 

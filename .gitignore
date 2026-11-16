@@ -16,3 +16,6 @@ venv/
 .DS_Store
 
 papers/manipulation_of_hamming/experiments_enhanced/plots_old
+
+# Experiment manager logs
+.manager/

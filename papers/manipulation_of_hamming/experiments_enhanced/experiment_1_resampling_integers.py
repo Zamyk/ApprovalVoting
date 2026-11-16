@@ -4,9 +4,6 @@ from datetime import datetime
 from functools import partial
 from . import RESULTS_DIRECTORY_PATH
 
-import votekit.elections.election_types.approval.hamming as approval_module
-from ..manipulation_of_hamming import _get_weights_on_int
-approval_module._get_hamming_weights = _get_weights_on_int
 from votekit.ballot_generator.std_generator.approval_impartial_culture import (
     approval_resampling_profile_generator,
 )
@@ -25,6 +22,7 @@ def make_params(tag, phi):
         "candidates": [3, 4, 5],
         "gen": partial(approval_resampling_profile_generator, p=P, phi=phi),
         "n_jobs": -3,
+        "integer_weights": True,
         "verbose": True,
     }
 

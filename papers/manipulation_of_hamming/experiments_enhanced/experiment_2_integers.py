@@ -2,9 +2,6 @@ import os
 from datetime import datetime
 from . import RESULTS_DIRECTORY_PATH
 
-import votekit.elections.election_types.approval.hamming as approval_module
-from ..manipulation_of_hamming import _get_weights_on_int
-approval_module._get_hamming_weights = _get_weights_on_int
 from votekit.ballot_generator.std_generator.approval_impartial_culture import (
     approval_ic_profile_generator,
     approval_biased_profile_generator
@@ -27,6 +24,7 @@ PARAMS = {
     "gen": approval_ic_profile_generator,
     "weights": WEIGHTS_CONFIG,
     "n_jobs": -3,
+    "integer_weights": True,
     "verbose": True
 }
 

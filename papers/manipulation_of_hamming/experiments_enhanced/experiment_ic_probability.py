@@ -8,10 +8,7 @@ import numpy as np
 
 from . import RESULTS_DIRECTORY_PATH
 
-import votekit.elections.election_types.approval.hamming as approval_module
-from ..manipulation_of_hamming import _get_weights_on_int, get_manipulability_ratio, save_data
-# integer weights (avoids floating point ties); the function was renamed in VoteKit
-approval_module._get_hamming_weights = _get_weights_on_int
+from ..manipulation_of_hamming import get_manipulability_ratio, resolve_weights, save_data
 
 from votekit.ballot_generator.std_generator.approval_impartial_culture import (
     approval_ic_profile_generator,
@@ -48,7 +45,7 @@ def experiment_ic_probability(
         gen = partial(approval_ic_profile_generator, p=p)
         for name, w in weights:
             ratio = get_manipulability_ratio(
-                candidates, n_voters, gen, w(n_voters), n_iterations, n_jobs=n_jobs
+                candidates, n_voters, gen, resolve_weights(w(n_voters), n_voters, True), n_iterations, n_jobs=n_jobs
             )
             results.append({"f": name, "p": p, "manipulability": ratio})
             if verbose:
