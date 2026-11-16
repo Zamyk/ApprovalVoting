@@ -28,14 +28,15 @@ class Task:
     broken: str = ""           # reason; such a task is not ticked by "all" / group ticks
 
 
-def experiment(paper, family, variant, *, run, plot, data, figures, note="", broken=""):
+def experiment(paper, family, variant, *, run, plot, data, figures, note="", broken="",
+               run_args=(), plot_args=()):
     """One experiment: a run task writing ``data`` and a plot task reading it."""
     base = f"{paper}/{family}/{variant}"
     return [
         Task(f"{base}:run", "run", paper, family, variant, run,
-             writes=tuple(data), note=note, broken=broken),
+             writes=tuple(data), args=tuple(run_args), note=note, broken=broken),
         Task(f"{base}:plot", "plot", paper, family, variant, plot,
-             reads=tuple(data), writes=tuple(figures), broken=broken),
+             reads=tuple(data), writes=tuple(figures), args=tuple(plot_args), broken=broken),
     ]
 
 

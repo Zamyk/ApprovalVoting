@@ -70,8 +70,8 @@ def cmd_check(registry, console):
         if task.kind == "run" and not task.writes:
             console.print(f"[red]run task declares no outputs[/] {task.id}")
             problems += 1
-        if task.kind == "plot" and not (task.reads and task.writes):
-            console.print(f"[red]plot task needs reads and writes[/] {task.id}")
+        if task.kind == "plot" and not task.writes:
+            console.print(f"[red]plot task declares no outputs[/] {task.id}")
             problems += 1
     broken = [t for t in registry.tasks if t.broken]
     console.print(f"{len(registry.tasks)} task(s) checked, {problems} problem(s), "

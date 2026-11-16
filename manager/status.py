@@ -51,6 +51,6 @@ def task_status(task):
         return Status("blocked", "needs data first", False)
     if not all(matches(p) for p in task.writes):
         return Status("ready", "not plotted yet", True)
-    if newest(task.reads) > oldest(task.writes):
+    if task.reads and newest(task.reads) > oldest(task.writes):
         return Status("stale", "plot older than data", True)
     return Status("done", f"plotted {age(oldest(task.writes))} ago", False)
