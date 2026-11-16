@@ -1,11 +1,8 @@
 from pathlib import Path
 import pandas as pd
 
-from . import RESULTS_DIRECTORY_PATH, PLOTS_DIRECTORY_PATH
+from . import PLOTS_DIRECTORY_PATH, RESAMPLING_P as P, RESAMPLING_PHIS as PHIS, RESULTS_DIRECTORY_PATH
 from ._plot_common import plot_m_panels
-
-P = 0.5
-PHIS = [("phi03", 0.3), ("phi05", 0.5), ("phi08", 0.8)]
 
 
 def plot_experiment_1_resampling_integers(directory=None, save_dir=None, show=True):

@@ -1,7 +1,5 @@
+from . import RESAMPLING_P as P, RESAMPLING_PHIS as PHIS
 from ._plot_common import plot_f_single_figure
-
-P = 0.5
-PHIS = [("phi03", 0.3), ("phi05", 0.5), ("phi08", 0.8)]
 
 
 def plot_experiment_2_resampling_integers():

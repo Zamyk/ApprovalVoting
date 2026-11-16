@@ -1,17 +1,13 @@
 """Experiment 2 (manipulability vs number of voters, 5 candidates, integer weights) for the
-(p, phi)-resampling model with p = 0.5 and phi in {0.3, 0.5, 0.8}."""
+(p, phi)-resampling model with p = 0.5 and phi in {0.25, 0.5, 0.75}."""
 from datetime import datetime
 from functools import partial
-from . import RESULTS_DIRECTORY_PATH
+from . import RESAMPLING_P as P, RESAMPLING_PHIS as PHIS, RESULTS_DIRECTORY_PATH
 
 from votekit.ballot_generator.std_generator.approval_impartial_culture import (
     approval_resampling_profile_generator,
 )
 from ..manipulation_of_hamming import experiment_2
-
-P = 0.5
-# (file tag, phi). No dots in the tag: Path.with_suffix would treat ".3" as an extension.
-PHIS = [("phi03", 0.3), ("phi05", 0.5), ("phi08", 0.8)]
 
 WEIGHTS_CONFIG = [
     ("f_2n_3", lambda n: ("f", n * 2 // 3)),

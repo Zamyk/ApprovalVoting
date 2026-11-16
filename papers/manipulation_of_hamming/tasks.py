@@ -6,6 +6,9 @@ Paths are relative to the repository root.
 """
 
 from manager.spec import experiment
+from papers.manipulation_of_hamming.experiments_enhanced import RESAMPLING_PHIS
+
+PHI_TAGS = [tag for tag, _ in RESAMPLING_PHIS]
 
 PAPER = "manipulation_of_hamming"
 TITLE = "Manipulation of Hamming-based Approval Voting (Barrot, Lang, Yokoo, AAMAS 2017)"
@@ -63,9 +66,9 @@ TASKS = [
               ["experiment_1_iterations_uniform_*.csv", "experiment_1_iterations_biased_*.csv"],
               note="many repeated runs, plotted as a min-max band"),
     *enhanced("exp1", "resampling-integers", "experiment_1_resampling_integers",
-              [f"experiment_1_resampling_integers_{t}.csv" for t in ("phi03", "phi05", "phi08")],
-              figures=[f"plot_experiment_1_resampling_integers_{t}.png" for t in ("phi03", "phi05", "phi08")],
-              note="(p, phi)-resampling, p=0.5, phi in {0.3, 0.5, 0.8}; one figure per phi"),
+              [f"experiment_1_resampling_integers_{t}.csv" for t in PHI_TAGS],
+              figures=[f"plot_experiment_1_resampling_integers_{t}.png" for t in PHI_TAGS],
+              note="(p, phi)-resampling, p=0.5, phi in {0.25, 0.5, 0.75}; one figure per phi"),
 
     # ---- Experiment 2: number of voters -------------------------------------
     *enhanced("exp2", "integers", "experiment_2_integers", ["experiment_2_integers.csv"]),
@@ -82,9 +85,9 @@ TASKS = [
     *enhanced("exp2", "euclidean-uniform-integers", "experiment_2_euclidean_uniform_integers",
               pair("experiment_2_euclidean_uniform_integers", "normal", "triangle")),
     *enhanced("exp2", "resampling-integers", "experiment_2_resampling_integers",
-              [f"experiment_2_resampling_integers_{t}.csv" for t in ("phi03", "phi05", "phi08")],
-              figures=[f"plot_experiment_2_resampling_integers_{t}.png" for t in ("phi03", "phi05", "phi08")],
-              note="(p, phi)-resampling, p=0.5, phi in {0.3, 0.5, 0.8}; one figure per phi"),
+              [f"experiment_2_resampling_integers_{t}.csv" for t in PHI_TAGS],
+              figures=[f"plot_experiment_2_resampling_integers_{t}.png" for t in PHI_TAGS],
+              note="(p, phi)-resampling, p=0.5, phi in {0.25, 0.5, 0.75}; one figure per phi"),
     *enhanced("exp2", "iterations", "experiment_2_iterations", ["experiment_2_iterations_*.csv"],
               note="many repeated runs, plotted as a min-max band"),
 

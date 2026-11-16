@@ -269,7 +269,8 @@ def plot_f_pair_figure(stems, titles, base, start_idx=None, end_idx=None, *,
 
 
 def plot_f_single_figure(stem, base, start_idx=None, end_idx=None, *, title="Uniform Elections",
-                         aggregate=False, indexed=True, band_alpha=None, black_text=False):
+                         aggregate=False, indexed=True, band_alpha=None, black_text=False,
+                         ylim=(0.3, 1.0), yticks=(0.3, 0.5, 0.7, 0.9)):
     """Single f-lines panel vs number of voters."""
     if black_text:
         use_black_text()
@@ -291,8 +292,8 @@ def plot_f_single_figure(stem, base, start_idx=None, end_idx=None, *, title="Uni
     ax.set_xlabel("Number of Voters", fontsize=14, labelpad=10)
     ax.set_ylabel("Ratio of Manipulation", fontsize=14, labelpad=10)
     ax.set_xlim(df["n"].min(), df["n"].max())
-    ax.set_ylim(0.3, 1.0)
-    ax.set_yticks([0.3, 0.5, 0.7, 0.9])
+    ax.set_ylim(*ylim)
+    ax.set_yticks(list(yticks))
     ax.tick_params(axis="both", which="major", direction="in", labelsize=13, length=6,
                    right=False, top=False)
     ax.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), frameon=False, fontsize=15,
