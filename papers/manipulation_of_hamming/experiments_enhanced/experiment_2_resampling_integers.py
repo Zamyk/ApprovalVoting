@@ -25,7 +25,7 @@ def make_params(tag, phi):
         "candidates": ["A", "B", "C", "D", "E"],
         "gen": partial(approval_resampling_profile_generator, p=P, phi=phi),
         "weights": WEIGHTS_CONFIG,
-        "n_jobs": -3,
+        "n_jobs": -2,
         "integer_weights": True,
         "verbose": True,
     }
