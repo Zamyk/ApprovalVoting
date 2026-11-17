@@ -149,7 +149,8 @@ def Reverse_Seq_PAV(profile: ApprovalProfile):
 def Phragmen(profile: ApprovalProfile):
     candidate_approval_voters_sets = {c: set() for c in profile.candidates}
     for i, ballot in enumerate(profile.ballots):
-        for candidate in ballot.approvals:
+        approvals = ballot.approvals if ballot.approvals else []
+        for candidate in approvals:
             candidate_approval_voters_sets[candidate].add(i)
 
     not_elected_candidates = list(profile.candidates)
@@ -192,7 +193,6 @@ def Phragmen(profile: ApprovalProfile):
 
         ranking.append(best_candidate)
         voters_loads = best_candidate_loads
-        print(voters_loads)
         not_elected_candidates.remove(best_candidate)
 
     return ranking
@@ -218,6 +218,57 @@ def Best_of(profile: ApprovalProfile, rule_args: list[tuple[Callable[[ApprovalPr
             best_ranking = ranking
 
     return best_ranking
+
+
+def Method_of_Equal_Shares(profile: ApprovalProfile):
+    voters_loads = [Fraction(1, 1) for i in range(len(profile.ballots))]
+
+    candidate_approval_voters_sets = {c: set() for c in profile.candidates}
+    for i, ballot in enumerate(profile.ballots):
+        approvals = ballot.approvals if ballot.approvals else []
+        for candidate in approvals:
+            candidate_approval_voters_sets[candidate].add(i)
+
+    not_elected_candidates = list(profile.candidates)
+    ranking = []
+
+    p = Fraction(len(profile.ballots), len(profile.candidates))
+
+    while not_elected_candidates:
+        min_q = Fraction(2,1)
+        best_candidate = None
+        for c in not_elected_candidates:
+            voters_approving_c = candidate_approval_voters_sets[c]
+            if not voters_approving_c:
+                continue
+            
+            voters_approving_c_loads_sum = sum(voters_loads[i] for i in voters_approving_c)
+            if voters_approving_c_loads_sum >= p:
+                voters_approving_c_loads = sorted([voters_loads[i] for i in voters_approving_c])
+                load_sum = Fraction(0, 1)
+                q = Fraction(0, 1)
+                for j, load in enumerate(voters_approving_c_loads):
+                    load_sum += load * (len(voters_approving_c_loads) - j)
+                    q += load
+                    if load_sum >= p:
+                        load_sum -= load * (len(voters_approving_c_loads) - j)
+                        q -= load
+                        frac = (p - load_sum) / (len(voters_approving_c_loads) - j)
+                        q += frac
+                        break
+                if q < min_q:
+                    min_q = q
+                    best_candidate = c
+
+        if best_candidate is not None:
+            ranking.append(best_candidate)
+            not_elected_candidates.remove(best_candidate)
+            for i in candidate_approval_voters_sets[best_candidate]:
+                voters_loads[i] = max(Fraction(0, 1), voters_loads[i] - min_q)
+        else:
+            break
+
+    return ranking + not_elected_candidates
 
 
 

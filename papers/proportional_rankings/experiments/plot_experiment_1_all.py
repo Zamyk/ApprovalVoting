@@ -13,8 +13,8 @@ def plot_all_rules_grid():
         {"title": "2-Geometric\nRule", "suffix": "2_geometric"},
         {"title": "10-Geometric\nRule", "suffix": "10_geometric"},
         {"title": "SeqPAV", "suffix": "seqpav"},
-        {"title": "Reverse SeqPAV", "suffix": "reverse_seqpav"},
-        {"title": "Best-of", "suffix": "best_of"},
+        {"title": "Reverse SeqPAV", "suffix": "revseqpav"},
+        {"title": "Best-of", "suffix": "bestof"},
     ]
 
     # Utworzenie siatki 3x3
