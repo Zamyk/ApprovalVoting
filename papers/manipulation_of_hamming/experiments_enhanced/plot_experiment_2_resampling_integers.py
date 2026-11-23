@@ -9,6 +9,8 @@ def plot_experiment_2_resampling_integers():
             f"experiment_2_resampling_integers_{tag}",
             f"plot_experiment_2_resampling_integers_{tag}",
             title=rf"$p={P}$, $\varphi={phi}$",
+            # values reach 0, so the default 0.3-1.0 range would clip the curves
+            ylim=(0.0, 1.0), yticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
         )
 
 

@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from approval_with_runoff import alpha_seqAV, approval_counts, pair_lines, seq_components
-from generators import generate_profile_gaussian, generate_profile_triangular
+from generators import approval_profiles
 
 
 DS = [0.1, 0.25, 0.33, 0.5]
@@ -15,107 +15,72 @@ N_ALPHAS = 50
 N_REPS = 50
 
 
-def voter_center(voters):
-  # voters are always (n, dim), including 1D as (n, 1)
-  return np.asarray(voters, dtype=float).mean(axis=0)
-
-
 def point_distance(a, b):
   return float(np.linalg.norm(np.asarray(a, dtype=float) - np.asarray(b, dtype=float)))
 
 
-def finalist_distance(candidates, second, center):
-  return point_distance(candidates[second], center)
-
-
-def _distances_for_profile(candidates, alphas, counts, with_winner, center):
+def _distances_for_profile(candidates, alphas, counts, with_winner):
+  """Distance between the two alpha-seqAV finalists for each alpha."""
   distances = np.empty(len(alphas))
   for i, alpha in enumerate(alphas):
-    _, second = alpha_seqAV(counts, with_winner, alpha)
-    distances[i] = finalist_distance(candidates, second, center)
+    winner, second = alpha_seqAV(counts, with_winner, alpha)
+    distances[i] = point_distance(candidates[second], candidates[winner])
   return distances
 
 
+def _seq_distances(profile, candidates, alphas):
+  """Distance between the seqAV finalists for each alpha. The first finalist is the AV
+  winner, so this is also the distance of the second finalist from the AV winner."""
+  _, counts, with_winner = seq_components(profile)
+  return (_distances_for_profile(candidates, alphas, counts, with_winner),)
+
+
 def run_sample(generator, ds=DS, n_voters=N_VOTERS, n_candidates=N_CANDIDATES, n_alphas=N_ALPHAS):
+  """One set of positions, thresholded at every ``d``."""
   alphas = np.linspace(0, 1, n_alphas)
+  candidates, voters = generator(n_voters, n_candidates)
   rows = []
-  for d in ds:
-    profile, candidates, voters = generator(n_voters, n_candidates, d)
-    _, counts, with_winner = seq_components(profile)
-    distances = _distances_for_profile(candidates, alphas, counts, with_winner, voter_center(voters))
+  for d, profile in zip(ds, approval_profiles(voters, candidates, ds)):
+    (distances,) = _seq_distances(profile, candidates, alphas)
     for alpha, value in zip(alphas, distances):
       rows.append({"d": d, "alpha": float(alpha), "distance": float(value)})
   return pd.DataFrame(rows)
 
 
-def run_triangle(ds=DS, n_voters=N_VOTERS, n_candidates=N_CANDIDATES, n_alphas=N_ALPHAS):
-  return run_sample(generate_profile_triangular, ds, n_voters, n_candidates, n_alphas)
+def _pair_positions(candidates, counts, rows, cols, intercept, overlap, alphas, reference):
+  """For each alpha, distance of the first and the second alpha-AV finalist from ``reference``.
 
-
-def run_gaussian(ds=DS, n_voters=N_VOTERS, n_candidates=N_CANDIDATES, n_alphas=N_ALPHAS):
-  return run_sample(generate_profile_gaussian, ds, n_voters, n_candidates, n_alphas)
-
-
-def _iteration(args):
-  generator, d_index, d, n_voters, n_candidates, alphas = args
-  profile, candidates, voters = generator(n_voters, n_candidates, d)
-  _, counts, with_winner = seq_components(profile)
-  distances = _distances_for_profile(candidates, alphas, counts, with_winner, voter_center(voters))
-  return d_index, distances
-
-
-def run_iterations(generator, n_reps=N_REPS, ds=DS, n_voters=N_VOTERS, n_candidates=N_CANDIDATES, n_alphas=N_ALPHAS, n_jobs=None):
-  alphas = np.linspace(0, 1, n_alphas)
-  if n_jobs is None or n_jobs == -1:
-    n_jobs = os.cpu_count() or 1
-  tasks = [
-    (generator, d_index, d, n_voters, n_candidates, alphas)
-    for _ in range(n_reps)
-    for d_index, d in enumerate(ds)
-  ]
-  collected = [[] for _ in ds]
-  if n_jobs == 1:
-    finished = (_iteration(task) for task in tasks)
-  else:
-    pool = ProcessPoolExecutor(max_workers=n_jobs)
-    finished = pool.map(_iteration, tasks)
-  try:
-    for done, (d_index, distances) in enumerate(finished, 1):
-      collected[d_index].append(distances)
-      print(f"Finished profile {done}/{len(tasks)}", flush=True)
-  finally:
-    if n_jobs != 1:
-      pool.shutdown()
-
-  return _aggregate(collected, ds, alphas)
-
-
-def _pair_positions(candidates, counts, rows, cols, intercept, overlap, alphas, center):
-  winner = np.empty(len(alphas))
+  The first finalist is the one with more approvals (ties: the one closer to ``reference``).
+  """
+  first = np.empty(len(alphas))
   second = np.empty(len(alphas))
   for i, alpha in enumerate(alphas):
     best = int(np.argmax(intercept - alpha * overlap))
     a = int(rows[best])
     b = int(cols[best])
-    da = point_distance(candidates[a], center)
-    db = point_distance(candidates[b], center)
+    da = point_distance(candidates[a], reference)
+    db = point_distance(candidates[b], reference)
     if counts[b] > counts[a] or (counts[b] == counts[a] and db < da):
-      a, b = b, a
       da, db = db, da
-    winner[i] = da
+    first[i] = da
     second[i] = db
-  return winner, second
+  return first, second
 
 
-def _av_iteration(args):
-  generator, d_index, d, n_voters, n_candidates, alphas = args
-  profile, candidates, voters = generator(n_voters, n_candidates, d)
+def _av_distances(profile, candidates, alphas):
+  """Distances of the first and second alpha-AV finalist from the AV winner for each alpha."""
   counts = approval_counts(profile)
+  av_winner = candidates[int(np.argmax(counts))]
   rows, cols, intercept, overlap = pair_lines(profile, counts)
-  winner, second = _pair_positions(
-    candidates, counts, rows, cols, intercept, overlap, alphas, voter_center(voters)
-  )
-  return d_index, winner, second
+  return _pair_positions(candidates, counts, rows, cols, intercept, overlap, alphas, av_winner)
+
+
+def _repetition(args):
+  """One repetition: draw positions once, evaluate ``measure`` on the profile for every ``d``."""
+  measure, generator, ds, n_voters, n_candidates, alphas = args
+  candidates, voters = generator(n_voters, n_candidates)
+  return [measure(profile, candidates, alphas)
+          for profile in approval_profiles(voters, candidates, ds)]
 
 
 def _aggregate(collected, ds, alphas):
@@ -133,28 +98,40 @@ def _aggregate(collected, ds, alphas):
   return pd.DataFrame(rows)
 
 
-def run_av_iterations(generator, n_reps=N_REPS, ds=DS, n_voters=N_VOTERS, n_candidates=N_CANDIDATES, n_alphas=N_ALPHAS, n_jobs=None):
+def _run_repeated(measure, n_outputs, generator, n_reps, ds, n_voters, n_candidates, n_alphas, n_jobs):
+  """Run ``measure`` on ``n_reps`` position draws (each shared by all ``d``).
+
+  Returns one min/max/mean frame per output of ``measure``.
+  """
   alphas = np.linspace(0, 1, n_alphas)
   if n_jobs is None or n_jobs == -1:
     n_jobs = os.cpu_count() or 1
-  tasks = [
-    (generator, d_index, d, n_voters, n_candidates, alphas)
-    for _ in range(n_reps)
-    for d_index, d in enumerate(ds)
-  ]
-  winners = [[] for _ in ds]
-  seconds = [[] for _ in ds]
+  tasks = [(measure, generator, ds, n_voters, n_candidates, alphas) for _ in range(n_reps)]
+  collected = [[[] for _ in ds] for _ in range(n_outputs)]
   if n_jobs == 1:
-    finished = (_av_iteration(task) for task in tasks)
+    finished = (_repetition(task) for task in tasks)
   else:
     pool = ProcessPoolExecutor(max_workers=n_jobs)
-    finished = pool.map(_av_iteration, tasks)
+    finished = pool.map(_repetition, tasks)
   try:
-    for done, (d_index, winner, second) in enumerate(finished, 1):
-      winners[d_index].append(winner)
-      seconds[d_index].append(second)
-      print(f"Finished profile {done}/{len(tasks)}", flush=True)
+    for done, per_d in enumerate(finished, 1):
+      for d_index, outputs in enumerate(per_d):
+        for k, values in enumerate(outputs):
+          collected[k][d_index].append(values)
+      print(f"Finished repetition {done}/{len(tasks)}", flush=True)
   finally:
     if n_jobs != 1:
       pool.shutdown()
-  return _aggregate(winners, ds, alphas), _aggregate(seconds, ds, alphas)
+  return [_aggregate(c, ds, alphas) for c in collected]
+
+
+def run_iterations(generator, n_reps=N_REPS, ds=DS, n_voters=N_VOTERS, n_candidates=N_CANDIDATES, n_alphas=N_ALPHAS, n_jobs=None):
+  """Distance between the seqAV finalists."""
+  (second,) = _run_repeated(_seq_distances, 1, generator, n_reps, ds, n_voters, n_candidates, n_alphas, n_jobs)
+  return second
+
+
+def run_av_iterations(generator, n_reps=N_REPS, ds=DS, n_voters=N_VOTERS, n_candidates=N_CANDIDATES, n_alphas=N_ALPHAS, n_jobs=None):
+  """Distances of the first and second alpha-AV finalist from the AV winner."""
+  winner, second = _run_repeated(_av_distances, 2, generator, n_reps, ds, n_voters, n_candidates, n_alphas, n_jobs)
+  return winner, second

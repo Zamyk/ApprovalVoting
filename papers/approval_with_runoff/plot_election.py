@@ -17,6 +17,13 @@ def _save(fig_path, show):
   return out
 
 
+def _style(i):
+  """Colour and line style of the ``i``-th labelled line: the 10 default colours, then the
+  same colours dash-dotted, so lines beyond the 10th do not repeat an earlier one."""
+  colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+  return dict(color=colors[i % len(colors)], linestyle=["-", "-.", ":"][i // len(colors) % 3])
+
+
 def plot_seq_scores(ballots, labels, title, save, show=True, top_n=None):
   winner, counts, with_winner = seq_components(ballots)
   alphas = np.linspace(0, 1, 200)
@@ -26,10 +33,9 @@ def plot_seq_scores(ballots, labels, title, save, show=True, top_n=None):
     keep = set([int(i) for i in np.argsort(-counts) if i != winner][:top_n])
 
   plt.figure(figsize=(8, 4.5))
-  for i in range(len(labels)):
-    if i == winner or i not in keep:
-      continue
-    plt.plot(alphas, counts[i] - alphas * with_winner[i], label=labels[i])
+  shown = [i for i in range(len(labels)) if i != winner and i in keep]
+  for n, i in enumerate(shown):
+    plt.plot(alphas, counts[i] - alphas * with_winner[i], label=labels[i], **_style(n))
 
   plt.axvline(x=0.5, color="black", linestyle="--", label="S-PAV")
   plt.title(title)
@@ -74,9 +80,9 @@ def plot_av_pairs(
   plt.figure(figsize=(8, 4.5))
   for k in sorted(keep - annotated):
     plt.plot(alphas, intercept[k] - alphas * overlap[k], color="0.75", linewidth=0.8, zorder=1)
-  for k in sorted(annotated):
+  for n, k in enumerate(sorted(annotated)):
     label = f"{labels[rows[k]]}/{labels[cols[k]]}"
-    plt.plot(alphas, intercept[k] - alphas * overlap[k], label=label, zorder=2)
+    plt.plot(alphas, intercept[k] - alphas * overlap[k], label=label, zorder=2, **_style(n))
 
   plt.axvline(x=0.5, color="black", linestyle="--", label="PAV")
   plt.title(title)
