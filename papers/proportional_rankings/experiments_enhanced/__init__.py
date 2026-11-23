@@ -8,3 +8,6 @@ PLOTS_DIRECTORY_PATH.mkdir(exist_ok=True)
 
 DATASETS_DIRECTORY_PATH = Path(__file__).resolve().parent / "datasets"
 DATASETS_DIRECTORY_PATH.mkdir(exist_ok=True)
+
+DATASETS_2_DIRECTORY_PATH = Path(__file__).resolve().parent / "datasets_2"
+DATASETS_2_DIRECTORY_PATH.mkdir(exist_ok=True)

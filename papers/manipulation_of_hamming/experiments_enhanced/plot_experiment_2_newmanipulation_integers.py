@@ -38,12 +38,12 @@ def plot_experiment_2_newmanipulation_integers():
     # 5. Styling to match the reference image exactly
     ax.set_title('Uniform Elections', fontsize=16, pad=15)
     ax.set_xlabel('Number of Voters', fontsize=14, labelpad=10)
-    ax.set_ylabel('Ratio of Manipulation', fontsize=14, labelpad=10)
+    ax.set_ylabel('Ratio of VotersManipulation', fontsize=14, labelpad=10)
 
     # Set limits and ticks based on your data and the reference image
     ax.set_xlim(df['n'].min(), df['n'].max())
-    ax.set_ylim(0.3, 1.0)
-    ax.set_yticks([0.3, 0.5, 0.7, 0.9])
+    ax.set_ylim(0.0, 0.5)
+    ax.set_yticks([0.1, 0.2, 0.3, 0.4])
 
     # Ticks pointing inward (direction='in')
     ax.tick_params(axis='both', which='major', direction='in', 

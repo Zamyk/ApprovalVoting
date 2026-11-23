@@ -1,15 +1,13 @@
 import os
 from . import RESULTS_DIRECTORY_PATH, DATASETS_DIRECTORY_PATH
-from functools import partial
 from ..proportional_rankings import experiment_1_one_rule, Seq_Thile
-from votekit.ballot_generator.std_generator.approval_impartial_culture import approval_ic_profile_generator, approval_biased_profile_generator
-
 
 
 PARAMS = {
     "path_to_results": RESULTS_DIRECTORY_PATH / "experiment_1_2_geometric.csv",
     "path_to_profiles": DATASETS_DIRECTORY_PATH,
-    "rule": partial(Seq_Thile, w="2-Geometric"),
+    "rule": Seq_Thile,
+    "rule_args": {"w": "2-Geometric"},
     "n_jobs": -1,
     "verbose": True
 }
