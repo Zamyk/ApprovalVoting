@@ -11,9 +11,9 @@ def plot_all_rules_grid():
         {"title": "Phragmén", "suffix": "phragmen"},
         {"title": "MES", "suffix": "mes"},
         
-        {"title": "5/4-Geometric\nRule", "suffix": "5_4_geometric"},
-        {"title": "2-Geometric\nRule", "suffix": "2_geometric"},
-        {"title": "10-Geometric\nRule", "suffix": "10_geometric"},
+        {"title": "5/4-Geometric\nRule", "suffix": "5-4-geometric"},
+        {"title": "2-Geometric\nRule", "suffix": "2-geometric"},
+        {"title": "10-Geometric\nRule", "suffix": "10-geometric"},
         {"title": "PAV", "suffix": "pav"},
         
         {"title": "SeqPAV", "suffix": "seqpav"},

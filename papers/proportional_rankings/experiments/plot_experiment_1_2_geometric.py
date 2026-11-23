@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 def plot_scatter_a_yr_2_geometric():
     # Wczytaj zbiór danych zawierający kolumny 'a' oraz 'y_r'
-    df = pd.read_csv(RESULTS_DIRECTORY_PATH / 'experiment_1_2_geometric.csv')
+    df = pd.read_csv(RESULTS_DIRECTORY_PATH / 'experiment_1_2-geometric.csv')
 
     # Inicjalizacja pojedynczego wykresu
     fig, ax = plt.subplots(figsize=(6, 5))

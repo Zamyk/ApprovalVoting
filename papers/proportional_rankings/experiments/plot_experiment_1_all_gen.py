@@ -108,7 +108,7 @@ def plot_all_rules_grid_shuffled():
             handles=legend_handles, 
             loc='center left', 
             bbox_to_anchor=(0.82, 0.5), 
-            title="Sposób generacji",
+            title="Generation Method",
             fontsize=10,
             title_fontsize=11,
             frameon=False

@@ -11,9 +11,9 @@ def plot_all_rules_grid_with_candidates():
         {"title": "Phragmén", "suffix": "phragmen"},
         {"title": "MES", "suffix": "mes"},
         
-        {"title": "5/4-Geometric\nRule", "suffix": "5_4_geometric"},
-        {"title": "2-Geometric\nRule", "suffix": "2_geometric"},
-        {"title": "10-Geometric\nRule", "suffix": "10_geometric"},
+        {"title": "5/4-Geometric\nRule", "suffix": "5-4-geometric"},
+        {"title": "2-Geometric\nRule", "suffix": "2-geometric"},
+        {"title": "10-Geometric\nRule", "suffix": "10-geometric"},
         {"title": "PAV", "suffix": "pav"},
         
         {"title": "SeqPAV", "suffix": "seqpav"},
@@ -78,7 +78,7 @@ def plot_all_rules_grid_with_candidates():
         fig.subplots_adjust(right=0.9, hspace=0.4, wspace=0.3)
         cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])  # [left, bottom, width, height]
         cbar = fig.colorbar(scat, cax=cbar_ax)
-        cbar.set_label('Liczba kandydatów (candidates)', fontsize=12)
+        cbar.set_label('Number of candidates', fontsize=12)
     else:
         plt.tight_layout()
         plt.subplots_adjust(hspace=0.4, wspace=0.3)

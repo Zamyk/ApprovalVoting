@@ -4,7 +4,7 @@ from ..proportional_rankings import experiment_1_one_rule, Seq_Thile
 
 
 PARAMS = {
-    "path_to_results": RESULTS_DIRECTORY_PATH / "experiment_1_10_geometric.csv",
+    "path_to_results": RESULTS_DIRECTORY_PATH / "experiment_1_10-geometric.csv",
     "path_to_profiles": DATASETS_DIRECTORY_PATH,
     "rule": Seq_Thile,
     "rule_args": {"w": "10-Geometric"},

@@ -73,7 +73,7 @@ def plot_all_rules_grid_with_candidates():
         fig.subplots_adjust(right=0.9, hspace=0.4, wspace=0.3)
         cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])  # [left, bottom, width, height]
         cbar = fig.colorbar(scat, cax=cbar_ax)
-        cbar.set_label('Liczba kandydatów (candidates)', fontsize=12)
+        cbar.set_label('Number of candidates', fontsize=12)
     else:
         plt.tight_layout()
         plt.subplots_adjust(hspace=0.4, wspace=0.3)
