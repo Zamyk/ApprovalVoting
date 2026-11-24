@@ -24,3 +24,7 @@ papers/proportional_rankings/experiments_enhanced/datasets
 papers/proportional_rankings/experiments_enhanced/datasets_2
 papers/proportional_rankings/experiments_enhanced/datasets_2_copy
 papers/proportional_rankings/experiments_enhanced/results/
+papers/manipulation_of_hamming/experiments_enhanced/plots_old
+
+# Experiment manager logs
+.manager/

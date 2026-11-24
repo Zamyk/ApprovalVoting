@@ -1,13 +1,7 @@
 import os
 from datetime import datetime
 from . import RESULTS_DIRECTORY_PATH
-import votekit.elections.election_types.approval.hamming as approval_module
-from ..manipulation_of_hamming import _get_weights_on_int
-approval_module._get_weights = _get_weights_on_int
 
-import papers.manipulation_of_hamming.manipulation_of_hamming as manipulation_module
-from ..manipulation_of_hamming import get_manipulability_ratio_e4_e5
-manipulation_module.get_manipulability_ratio = get_manipulability_ratio_e4_e5
 from votekit.ballot_generator.std_generator.approval_impartial_culture import approval_ic_profile_generator, approval_biased_profile_generator
 from ..manipulation_of_hamming import experiment_2
 
@@ -27,6 +21,8 @@ PARAMS = {
     "gen": approval_ic_profile_generator,
     "weights": WEIGHTS_CONFIG,
     "n_jobs": -3,
+    "per_voter": True,
+    "integer_weights": True,
     "verbose": True
 }
 

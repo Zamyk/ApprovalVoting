@@ -3,9 +3,6 @@ import random
 from datetime import datetime
 from . import RESULTS_DIRECTORY_PATH
 
-import votekit.elections.election_types.approval.hamming as approval_module
-from ..manipulation_of_hamming import _get_weights_on_int
-approval_module._get_weights = _get_weights_on_int
 
 from votekit.ballot_generator.std_generator.approval_impartial_culture import (
     approval_euclidean_generator,
@@ -38,6 +35,7 @@ PARAMS_NORMAL = {
     "candidates": [3, 4, 5],
     "gen": euclidean_normal_generator,
     "n_jobs": -3,
+    "integer_weights": True,
     "verbose": True,
 }
 
@@ -48,6 +46,7 @@ PARAMS_TRIANGLE = {
     "candidates": [3, 4, 5],
     "gen": euclidean_triangle_generator,
     "n_jobs": -3,
+    "integer_weights": True,
     "verbose": True,
 }
 
