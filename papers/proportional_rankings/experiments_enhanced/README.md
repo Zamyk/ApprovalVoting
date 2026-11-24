@@ -1,6 +1,7 @@
 # Experiments
 
-- experiments_1 - Figure 1: Proportion of manipulable elections depending on
-orness of $f^i-AV$, where $n = 25$
+- experiment_1 - 9 plots for different rules
 
-- experiments_2 - Figure 2: Proportion of manipulable elections depending on number of voters, where $m = 5$
+- experiment_2 - experimet_1 with additional rules
+
+- experiment_3 - devision of point-results into bins by number of voters/candidates

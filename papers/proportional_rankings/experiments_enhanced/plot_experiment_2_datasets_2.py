@@ -30,7 +30,7 @@ def plot_all_rules_grid():
         ax = axes[idx]
         
         # Oczekiwana ścieżka do pliku
-        file_name = f"experiment_1_datasets_2_{rule['suffix']}.csv"
+        file_name = f"experiment_1_datasets-2_{rule['suffix']}.csv"
         file_path = RESULTS_DIRECTORY_PATH / file_name
 
         if os.path.exists(file_path):
@@ -69,7 +69,7 @@ def plot_all_rules_grid():
     plt.subplots_adjust(hspace=0.4, wspace=0.3)
 
     # Zapisanie wykresu zbiorczego
-    output_name = 'plot_experiment_1_datasets_2_all_rules.png'
+    output_name = 'plot_experiment_1_datasets-2_all_rules.png'
     plt.savefig(PLOTS_DIRECTORY_PATH / output_name, bbox_inches='tight', dpi=300)
     print(f"Plot saved as '{output_name}'")
 

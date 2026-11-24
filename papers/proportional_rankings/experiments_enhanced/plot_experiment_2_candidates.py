@@ -32,7 +32,7 @@ def plot_all_rules_grid_with_candidates():
         ax = axes[idx]
         
         # Oczekiwana ścieżka do pliku
-        file_name = f"experiment_1_{rule['suffix']}.csv"
+        file_name = f"experiment_1_datasets-2_{rule['suffix']}.csv"
         file_path = RESULTS_DIRECTORY_PATH / file_name
 
         if os.path.exists(file_path):

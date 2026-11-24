@@ -18,13 +18,13 @@ RULES_INFO = [
     {"title": "Peters", "suffix": "peters"},
 ]
 
-VOTER_BINS = [
-    (2, 100, "2-100"),
-    (101, 200, "101-200"),
-    (201, 300, "201-300"),
-    (301, 400, "301-400"),
-    (401, 500, "401-500"),
-    (501, 600, "501-600"),
+CANDIDATE_BINS = [
+    (2, 3, "2-3"),
+    (4, 5, "4-5"),
+    (6, 7, "6-7"),
+    (8, 9, "8-9"),
+    (10, 11, "10-11"),
+    (12, 13, "12-13"),
 ]
 
 
@@ -43,12 +43,12 @@ def _format_subplot(ax, title, show_ylabel=False):
   ax.tick_params(axis="both", which="major", labelsize=9)
 
 
-def plot_scatter_a_yr_by_voters_bins():
+def plot_scatter_a_yr_by_candidates_bins():
   os.makedirs(PLOTS_DIRECTORY_PATH, exist_ok=True)
 
   for rule in RULES_INFO:
-    file_path = RESULTS_DIRECTORY_PATH / f"experiment_1_{rule['suffix']}.csv"
-    output_name = f"plot_scatter_a_yr_{rule['suffix']}_voters_bins.png"
+    file_path = RESULTS_DIRECTORY_PATH / f"experiment_1_datasets-2_{rule['suffix']}.csv"
+    output_name = f"plot_scatter_a_yr_{rule['suffix']}_candidates_bins.png"
 
     fig, axes = plt.subplots(2, 3, figsize=(15, 9))
     axes_flat = axes.flatten()
@@ -57,9 +57,9 @@ def plot_scatter_a_yr_by_voters_bins():
       try:
         df = pd.read_csv(file_path)
 
-        for idx, (low, high, label) in enumerate(VOTER_BINS):
+        for idx, (low, high, label) in enumerate(CANDIDATE_BINS):
           ax = axes_flat[idx]
-          subset = df[(df["n_voters"] >= low) & (df["n_voters"] <= high)]
+          subset = df[(df["candidates"] >= low) & (df["candidates"] <= high)]
 
           if not subset.empty:
             ax.scatter(
@@ -84,12 +84,12 @@ def plot_scatter_a_yr_by_voters_bins():
 
           _format_subplot(
               ax,
-              title=f"Voters: {label}",
+              title=f"Candidates: {label}",
               show_ylabel=(idx % 3 == 0),
           )
 
       except Exception as e:
-        for idx, (_, _, label) in enumerate(VOTER_BINS):
+        for idx, (_, _, label) in enumerate(CANDIDATE_BINS):
           ax = axes_flat[idx]
           ax.set_facecolor("#ffe6e6")
           ax.text(
@@ -102,10 +102,12 @@ def plot_scatter_a_yr_by_voters_bins():
               transform=ax.transAxes,
               fontsize=11,
           )
-          _format_subplot(ax, title=f"Voters: {label}", show_ylabel=(idx % 3 == 0))
+          _format_subplot(
+              ax, title=f"Candidates: {label}", show_ylabel=(idx % 3 == 0)
+          )
         print(f"Error reading '{file_path}': {e}")
     else:
-      for idx, (_, _, label) in enumerate(VOTER_BINS):
+      for idx, (_, _, label) in enumerate(CANDIDATE_BINS):
         ax = axes_flat[idx]
         ax.set_facecolor("#ffe6e6")
         ax.text(
@@ -119,7 +121,9 @@ def plot_scatter_a_yr_by_voters_bins():
             fontsize=11,
             fontweight="bold",
         )
-        _format_subplot(ax, title=f"Voters: {label}", show_ylabel=(idx % 3 == 0))
+        _format_subplot(
+            ax, title=f"Candidates: {label}", show_ylabel=(idx % 3 == 0)
+        )
       print(f"Missing file: '{file_path}'")
 
     fig.suptitle(rule["title"].replace("\n", " "), fontsize=15, y=0.98)
@@ -130,4 +134,4 @@ def plot_scatter_a_yr_by_voters_bins():
 
 
 if __name__ == "__main__":
-  plot_scatter_a_yr_by_voters_bins()
+  plot_scatter_a_yr_by_candidates_bins()

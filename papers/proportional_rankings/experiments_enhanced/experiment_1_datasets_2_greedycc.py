@@ -4,7 +4,7 @@ from functools import partial
 from ..proportional_rankings import experiment_1_one_rule, Seq_Thile
 
 PARAMS = {
-    "path_to_results": RESULTS_DIRECTORY_PATH / "experiment_1_datasets-greedycc.csv",
+    "path_to_results": RESULTS_DIRECTORY_PATH / "experiment_1_datasets-2_greedycc.csv",
     "path_to_profiles": DATASETS_2_DIRECTORY_PATH,
     "rule": Seq_Thile,
     "rule_args": {"w": "GreedyCC"},
